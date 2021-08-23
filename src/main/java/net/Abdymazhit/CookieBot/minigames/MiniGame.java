@@ -34,7 +34,7 @@ public class MiniGame {
      * Создает канал мини-игр
      * @param category Категория мини-игр
      */
-    public void createChannel(Category category) {
+    private void createChannel(Category category) {
         try {
             channel = category.createTextChannel(channelName).submit().get();
         } catch (InterruptedException | ExecutionException e) {

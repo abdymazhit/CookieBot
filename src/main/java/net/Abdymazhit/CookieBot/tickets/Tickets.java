@@ -25,6 +25,9 @@ public class Tickets {
     /** Список тикетов */
     private final List<Ticket> tickets;
 
+    /** Последний id тикета */
+    private int lastId;
+
     /**
      * Инициализирует категорию тикетов
      */
@@ -32,6 +35,7 @@ public class Tickets {
         deleteCategory();
         createCategory();
         tickets = new ArrayList<>();
+        lastId = 0;
     }
 
     /**
@@ -67,7 +71,16 @@ public class Tickets {
      * @param member Тестер
      */
     public void createTicket(String miniGame, Member member) {
-        tickets.add(new Ticket(miniGame, tickets.size(), member));
+        tickets.add(new Ticket(miniGame, lastId, member));
+        lastId++;
+    }
+
+    /**
+     * Удаляет тикет из списка тикетов
+     * @param ticket Тикет
+     */
+    public void removeTicket(Ticket ticket) {
+        tickets.remove(ticket);
     }
 
     /**

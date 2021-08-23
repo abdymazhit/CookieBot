@@ -28,7 +28,7 @@ public enum Priority {
      * @param priorityName Название приоритета
      * @return Приоритет
      */
-    public static  Priority getPriority(String priorityName) {
+    public static Priority getPriority(String priorityName) {
         for(Priority priority : Priority.values()) {
             if(priority.getName().equals(priorityName)) {
                 return priority;

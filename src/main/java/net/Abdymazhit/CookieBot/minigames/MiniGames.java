@@ -64,7 +64,7 @@ public class MiniGames {
     /**
      * Создает список мини-игр
      */
-    public void createMiniGames() {
+    private void createMiniGames() {
         miniGames = new ArrayList<>();
         miniGames.add(new HideAndSeek(category));
     }

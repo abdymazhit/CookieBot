@@ -27,7 +27,7 @@ public class HideAndSeek extends MiniGame {
                         "Прячущиеся должны выжить, а искатели \n" +
                         "попытаться найти прячущихся и убить их. \n" +
                         "\n" +
-                        "Для подачи отчета о баге напишите команду **!ticket**"
+                        "Для подачи отчета о баге введите команду **!ticket**"
         );
         sendWelcomeMessage(embedBuilder.build());
         embedBuilder.clear();

@@ -2,15 +2,18 @@ package net.Abdymazhit.CookieBot.tickets;
 
 import net.Abdymazhit.CookieBot.CookieBot;
 import net.Abdymazhit.CookieBot.enums.Priority;
+import net.Abdymazhit.CookieBot.enums.TicketState;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Представляет собой тикет
@@ -23,8 +26,8 @@ public class Ticket {
     /** Канал тикета */
     private TextChannel channel;
 
-    /** Значение, заполнен ли бланк тикета */
-    private boolean isFilled;
+    /** Стадия тикета */
+    private TicketState ticketState;
 
     /** Название мини-игры */
     private final String miniGame;
@@ -55,7 +58,7 @@ public class Ticket {
      */
     public Ticket(String miniGame, int id, Member member) {
         this.miniGame = miniGame;
-        isFilled = false;
+        ticketState = TicketState.FILLING;
         createChannel(id, member);
     }
 
@@ -64,11 +67,15 @@ public class Ticket {
      * @param id Id тикета
      * @param member Тестер
      */
-    public void createChannel(int id, Member member) {
+    private void createChannel(int id, Member member) {
         try {
             channel = CookieBot.tickets.getCategory().createTextChannel("Тикет-" + id)
                     .addPermissionOverride(member, EnumSet.of(Permission.VIEW_CHANNEL), null)
                     .submit().get();
+            // Удалить канал через 60 минут
+            channel.delete().submitAfter(60, TimeUnit.MINUTES);
+
+            // Отправить информационное сообщение
             sendInformationMessage();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -94,7 +101,11 @@ public class Ticket {
                         "2. Приложенные материалы должны быть загружены в **другие ресурсы**\n" +
                         "3. Cкриншоты желательно загружать в **imgur.com**\n" +
                         "4. Видеоматериалы желательно загружать в **youtube.com**",
-                true);
+                false);
+        embedBuilder.addField("В случае ошибки",
+                "Введите команду **!cancel** для отмены тикета",
+                false);
+        embedBuilder.setDescription("Обратите внимание, у вас есть 60 минут для отправки тикета");
         channel.sendMessageEmbeds(embedBuilder.build()).submit();
         embedBuilder.clear();
 
@@ -123,16 +134,25 @@ public class Ticket {
      * @param message Сообщение
      */
     public void onMessageReceived(String message) {
-        // Проверка, заполнен ли бланк тикета
-        if(!isFilled) {
+        // Проверка на команду !cancel
+        if(message.equals("!cancel")) {
+            if(ticketState.equals(TicketState.CANCELLING)) {
+                channel.sendMessage("Ошибка! Тикет уже отменяется!").submit();
+            } else if(ticketState.equals(TicketState.SUCCESS)) {
+                channel.sendMessage("Ошибка! Нельзя отменить уже отправленный тикет!").submit();
+            } else {
+                cancelTicket();
+            }
+        }
+        // Проверка, стадии тикета на заполнение
+        else if(ticketState.equals(TicketState.FILLING)) {
             // Получить заполненный бланк по строкам
             String[] strings = message.split("\n");
 
             // Проверка, является ли длина строк 17
             // 17, так как это длина бланка
             if(strings.length != 17) {
-                channel.sendMessage("Вы неправильно заполнили бланк! Попросите помощи у коллег! Тикет закрывается...").submit();
-                closeTicket();
+                channel.sendMessage("Ошибка! Вы неправильно заполнили бланк!").submit();
             } else {
                 // Получить заполненные параметры
                 title = strings[1];
@@ -153,14 +173,18 @@ public class Ticket {
                                 "Критический : Серверная ошибка, которая приводит к крашу\n"
                 ).submit();
 
-                // Установить значение заполненности тикета
-                isFilled = true;
+                // Установить стадию тикета на выбор приоритета
+                ticketState = TicketState.SELECTING_PRIORITY;
             }
-        } else {
+        }
+        // Проверка, стадии тикета на выбор приоритета
+        else if(ticketState.equals(TicketState.SELECTING_PRIORITY)) {
             // Получить приоритет тикета
             Priority priority = Priority.getPriority(message);
 
-            if(priority != null) {
+            if(priority == null) {
+                channel.sendMessage("Ошибка! Вы указали неправильный приоритет тикета!").submit();
+            } else {
                 // Отправить информацию о тикете
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setTitle("Новый тикет");
@@ -177,19 +201,38 @@ public class Ticket {
                 channel.sendMessageEmbeds(embedBuilder.build()).submit();
                 embedBuilder.clear();
 
-                channel.sendMessage("Проверьте правильность заполнения. Если всё правильно, напишите команду **/send**. Если вы обнаружили ошибку, напишите команду **/cancel**.").submit();
+                channel.sendMessage("Проверьте правильность заполнения. Если всё правильно, введите команду **!send**. Если вы обнаружили ошибку, введите команду **!cancel** для отмены тикета").submit();
+
+                // Установить стадию тикета на отправку
+                ticketState = TicketState.SENDING;
+            }
+        }
+        // Проверка, стадии тикета на отправку
+        else if(ticketState.equals(TicketState.SENDING)) {
+            // Проверка на команду !send
+            if(message.equals("!send")) {
+                sendTicket();
             } else {
-                channel.sendMessage("Неправильный приоритет тикета! Попросите помощи у коллег! Тикет закрывается...").submit();
-                closeTicket();
+                channel.sendMessage("Ошибка! Такой команды не существует!").submit();
             }
         }
     }
 
     /**
-     * Закрывает тикет
+     * Отправляет тикет
      */
-    private void closeTicket() {
+    private void sendTicket() {
+        ticketState = TicketState.SUCCESS;
+    }
 
+    /**
+     * Отменяет тикет
+     */
+    private void cancelTicket() {
+        channel.sendMessage("Тикет отменяется...").delay(3, TimeUnit.SECONDS).flatMap(Message::delete).submit();
+        channel.delete().submitAfter(3, TimeUnit.SECONDS);
+        CookieBot.tickets.removeTicket(this);
+        ticketState = TicketState.CANCELLING;
     }
 
     /**
