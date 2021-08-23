@@ -43,5 +43,7 @@ public class CookieBot {
 
         miniGames = new MiniGames();
         tickets = new Tickets();
+
+        jda.addEventListener(new EventsListener()) ;
     }
 }
