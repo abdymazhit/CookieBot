@@ -1,6 +1,7 @@
 package net.Abdymazhit.CookieBot;
 
 import net.Abdymazhit.CookieBot.minigames.MiniGames;
+import net.Abdymazhit.CookieBot.tickets.Tickets;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.utils.Compression;
@@ -25,6 +26,9 @@ public class CookieBot {
     /** Категория мини-игр */
     public static MiniGames miniGames;
 
+    /** Категория тикетов */
+    public static Tickets tickets;
+
     /**
      * Инициализирует бота
      * @throws LoginException Ошибка входа
@@ -38,5 +42,6 @@ public class CookieBot {
         jda = builder.build().awaitReady();
 
         miniGames = new MiniGames();
+        tickets = new Tickets();
     }
 }
