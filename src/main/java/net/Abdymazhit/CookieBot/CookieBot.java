@@ -23,6 +23,9 @@ public class CookieBot {
     /** Главный объект для работы с Discord API */
     public static JDA jda;
 
+    /** База данных */
+    public static Database database;
+
     /** Категория мини-игр */
     public static MiniGames miniGames;
 
@@ -41,6 +44,7 @@ public class CookieBot {
         builder.setCompression(Compression.ZLIB);
         jda = builder.build().awaitReady();
 
+        database = new Database();
         miniGames = new MiniGames();
         tickets = new Tickets();
 

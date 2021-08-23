@@ -32,6 +32,9 @@ public class Ticket {
     /** Название мини-игры */
     private final String miniGame;
 
+    /** Приоритет тикета */
+    private Priority priority;
+
     /** Заговолок */
     private String title;
 
@@ -180,7 +183,7 @@ public class Ticket {
         // Проверка, стадии тикета на выбор приоритета
         else if(ticketState.equals(TicketState.SELECTING_PRIORITY)) {
             // Получить приоритет тикета
-            Priority priority = Priority.getPriority(message);
+            priority = Priority.getPriority(message);
 
             if(priority == null) {
                 channel.sendMessage("Ошибка! Вы указали неправильный приоритет тикета!").submit();
@@ -222,6 +225,7 @@ public class Ticket {
      * Отправляет тикет
      */
     private void sendTicket() {
+        CookieBot.database.addTicket(this);
         ticketState = TicketState.SUCCESS;
     }
 
@@ -241,5 +245,69 @@ public class Ticket {
      */
     public TextChannel getChannel() {
         return channel;
+    }
+
+    /**
+     * Получает название мини-игры
+     * @return Название мини-игры
+     */
+    public String getMiniGame() {
+        return miniGame;
+    }
+
+    /**
+     * Получает приоритет тикета
+     * @return Приоритет тикета
+     */
+    public Priority getPriority() {
+        return priority;
+    }
+
+    /**
+     * Получает заговолок
+     * @return Заговолок
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Получает описание
+     * @return Описание
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Получает шаги для воспроизведения проблемы
+     * @return Шаги для воспроизведения проблемы
+     */
+    public String getSteps() {
+        return steps;
+    }
+
+    /**
+     * Получает что происходит в результате
+     * @return Что происходит в результате
+     */
+    public String getResult() {
+        return result;
+    }
+
+    /**
+     * Получает что должно происходить
+     * @return Что должно происходить
+     */
+    public String getShouldBe() {
+        return shouldBe;
+    }
+
+    /**
+     * Получает приложенные материалы
+     * @return Приложенные материалы
+     */
+    public String getMaterials() {
+        return materials;
     }
 }

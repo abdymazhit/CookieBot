@@ -7,10 +7,13 @@ package net.Abdymazhit.CookieBot.enums;
  * @author    Islam Abdymazhit
  */
 public enum Priority {
-    LOW("Низкий"),
-    MEDIUM("Средний"),
-    HIGH("Высокий"),
-    CRITICAL("Критический");
+    LOW(0, "Низкий"),
+    MEDIUM(1, "Средний"),
+    HIGH(2, "Высокий"),
+    CRITICAL(3, "Критический");
+
+    /** Id приоритета */
+    private final int id;
 
     /** Название приоритета */
     private final String name;
@@ -19,7 +22,8 @@ public enum Priority {
      * Инициализирует приоритет
      * @param name Название приоритета
      */
-    Priority(String name) {
+    Priority(int id, String name) {
+        this.id = id;
         this.name = name;
     }
 
@@ -36,6 +40,14 @@ public enum Priority {
         }
 
         return null;
+    }
+
+    /**
+     * Получает id приоритета
+     * @return Id приоритета
+     */
+    public int getId() {
+        return id;
     }
 
     /**
