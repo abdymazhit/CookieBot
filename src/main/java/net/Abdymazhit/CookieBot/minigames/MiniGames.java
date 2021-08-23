@@ -66,6 +66,7 @@ public class MiniGames {
      */
     public void createMiniGames() {
         miniGames = new ArrayList<>();
+        miniGames.add(new HideAndSeek(category));
     }
 
     /**
