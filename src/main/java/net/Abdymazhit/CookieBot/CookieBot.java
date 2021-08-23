@@ -1,5 +1,6 @@
 package net.Abdymazhit.CookieBot;
 
+import net.Abdymazhit.CookieBot.minigames.MiniGames;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.utils.Compression;
@@ -21,6 +22,9 @@ public class CookieBot {
     /** Главный объект для работы с Discord API */
     public static JDA jda;
 
+    /** Категория мини-игр */
+    public static MiniGames miniGames;
+
     /**
      * Инициализирует бота
      * @throws LoginException Ошибка входа
@@ -32,5 +36,7 @@ public class CookieBot {
         builder.setBulkDeleteSplittingEnabled(false);
         builder.setCompression(Compression.ZLIB);
         jda = builder.build().awaitReady();
+
+        miniGames = new MiniGames();
     }
 }
