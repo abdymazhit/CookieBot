@@ -1,6 +1,7 @@
 package net.Abdymazhit.CookieBot.products;
 
 import net.Abdymazhit.CookieBot.CookieBot;
+import net.Abdymazhit.CookieBot.products.channels.HideAndSeek;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -16,21 +17,22 @@ import java.util.concurrent.ExecutionException;
  * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
-public class Products {
+public class ProductsCategory {
 
     /** Категория продуктов */
     private Category category;
 
-    /** Список продуктов */
-    private List<Product> products;
+    /** Список каналов продуктов */
+    private List<ProductChannel> productChannels;
 
     /**
      * Инициализирует категорию продуктов
      */
-    public Products() {
+    public ProductsCategory() {
         deleteCategory();
         createCategory();
-        createProducts();
+        createProductsChannels();
+        updateProductsTickets();
     }
 
     /**
@@ -64,18 +66,27 @@ public class Products {
     }
 
     /**
-     * Создает список продуктов
+     * Создает каналы продуктов
      */
-    private void createProducts() {
-        products = new ArrayList<>();
-        products.add(new HideAndSeek(category));
+    private void createProductsChannels() {
+        productChannels = new ArrayList<>();
+        productChannels.add(new HideAndSeek(category));
     }
 
     /**
-     * Получает список продуктов
-     * @return Список продуктов
+     * Обновляет все тикеты продуктов
      */
-    public List<Product> getProducts() {
-        return products;
+    public void updateProductsTickets() {
+        for(ProductChannel productChannel : productChannels) {
+            productChannel.updateTickets();
+        }
+    }
+
+    /**
+     * Получает список каналов продуктов
+     * @return Список каналов продуктов
+     */
+    public List<ProductChannel> getProductChannels() {
+        return productChannels;
     }
 }

@@ -1,6 +1,7 @@
 package net.Abdymazhit.CookieBot.tickets;
 
 import net.Abdymazhit.CookieBot.CookieBot;
+import net.Abdymazhit.CookieBot.customs.Ticket;
 import net.Abdymazhit.CookieBot.enums.Priority;
 import net.Abdymazhit.CookieBot.enums.TicketState;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -16,63 +17,42 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Представляет собой тикет
+ * Представляет собой канал тикета
  *
  * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
-public class Ticket {
+public class TicketChannel {
 
     /** Канал тикета */
     private TextChannel channel;
 
+    /** Тикет */
+    private final Ticket ticket;
+
     /** Стадия тикета */
     private TicketState ticketState;
 
-    /** Название продукта */
-    private final String productName;
-
-    /** Приоритет тикета */
-    private Priority priority;
-
-    /** Заговолок */
-    private String title;
-
-    /** Описание */
-    private String description;
-
-    /** Шаги для воспроизведения проблемы */
-    private String steps;
-
-    /** Что происходит в результате */
-    private String result;
-
-    /** Что должно происходить */
-    private String shouldBe;
-
-    /** Приложенные материалы */
-    private String materials;
-
     /**
-     * Инициализирует тикет
+     * Инициализирует канал тикета
      * @param productName Название продукта
      * @param id Id тикета
      * @param member Тестер
      */
-    public Ticket(String productName, int id, Member member) {
-        this.productName = productName;
+    public TicketChannel(String productName, int id, Member member) {
+        ticket = new Ticket(productName);
         ticketState = TicketState.FILLING;
         createChannel(id, member);
     }
 
     /**
-     * Создает новый канал тикету
+     * Создает канал тикету
      * @param id Id тикета
      * @param member Тестер
      */
     private void createChannel(int id, Member member) {
         try {
-            channel = CookieBot.tickets.getCategory().createTextChannel("Тикет-" + id)
+            channel = CookieBot.ticketsCategory.getCategory().createTextChannel("Тикет-" + id)
                     .addPermissionOverride(member, EnumSet.of(Permission.VIEW_CHANNEL), null)
                     .submit().get();
             // Удалить канал через 60 минут
@@ -92,7 +72,7 @@ public class Ticket {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Новый тикет");
         embedBuilder.setColor(0xFF58B9FF);
-        embedBuilder.addField("Продукт", productName, false);
+        embedBuilder.addField("Продукт", ticket.getProductName(), false);
         embedBuilder.addField("Инструкция по заполнению тикета",
                 "1. Скопируйте бланк снизу\n" +
                         "2. Правильно заполните бланк\n" +
@@ -158,12 +138,12 @@ public class Ticket {
                 channel.sendMessage("Ошибка! Вы неправильно заполнили бланк!").submit();
             } else {
                 // Получить заполненные параметры
-                title = strings[1];
-                description = strings[4];
-                steps = strings[7];
-                result = strings[10];
-                shouldBe = strings[13];
-                materials = strings[16];
+                ticket.setTitle(strings[1]);
+                ticket.setDescription(strings[4]);
+                ticket.setSteps(strings[7]);
+                ticket.setResult(strings[10]);
+                ticket.setShouldBe(strings[13]);
+                ticket.setMaterials(strings[16]);
 
                 // Отправить сообщение о необходимости выбора приоритета тикета
                 channel.sendMessage(
@@ -184,23 +164,25 @@ public class Ticket {
         // Проверка, стадии тикета на выбор приоритета
         else if(ticketState.equals(TicketState.SELECTING_PRIORITY)) {
             // Получить приоритет тикета
-            priority = Priority.getPriority(message);
+            Priority priority = Priority.getPriority(message);
 
             if(priority == null) {
                 channel.sendMessage("Ошибка! Вы указали неправильный приоритет тикета!").submit();
             } else {
+                ticket.setPriority(priority);
+
                 // Отправить информацию о тикете
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setTitle("Новый тикет");
                 embedBuilder.setColor(0xFF58B9FF);
-                embedBuilder.addField("Продукт", productName, true);
+                embedBuilder.addField("Продукт", ticket.getProductName(), true);
                 embedBuilder.addField("Приоритет", priority.getName(), true);
-                embedBuilder.addField("Заговолок", title, false);
-                embedBuilder.addField("Описание проблемы", description, false);
-                embedBuilder.addField("Шаги для воспроизведения проблемы", steps, false);
-                embedBuilder.addField("Что происходит в результате", result, false);
-                embedBuilder.addField("Что должно происходить", shouldBe, false);
-                embedBuilder.addField("Приложенные материалы", materials, false);
+                embedBuilder.addField("Заговолок", ticket.getTitle(), false);
+                embedBuilder.addField("Описание проблемы", ticket.getDescription(), false);
+                embedBuilder.addField("Шаги для воспроизведения проблемы", ticket.getSteps(), false);
+                embedBuilder.addField("Что происходит в результате", ticket.getResult(), false);
+                embedBuilder.addField("Что должно происходить", ticket.getShouldBe(), false);
+                embedBuilder.addField("Приложенные материалы", ticket.getMaterials(), false);
                 embedBuilder.setTimestamp(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
                 channel.sendMessageEmbeds(embedBuilder.build()).submit();
                 embedBuilder.clear();
@@ -236,8 +218,16 @@ public class Ticket {
     private void cancelTicket() {
         channel.sendMessage("Тикет отменяется...").delay(3, TimeUnit.SECONDS).flatMap(Message::delete).submit();
         channel.delete().submitAfter(3, TimeUnit.SECONDS);
-        CookieBot.tickets.removeTicket(this);
+        CookieBot.ticketsCategory.removeTicket(this);
         ticketState = TicketState.CANCELLING;
+    }
+
+    /**
+     * Получает тикет
+     * @return Тикет
+     */
+    public Ticket getTicket() {
+        return ticket;
     }
 
     /**
@@ -246,69 +236,5 @@ public class Ticket {
      */
     public TextChannel getChannel() {
         return channel;
-    }
-
-    /**
-     * Получает название продукта
-     * @return Название продукта
-     */
-    public String getProductName() {
-        return productName;
-    }
-
-    /**
-     * Получает приоритет тикета
-     * @return Приоритет тикета
-     */
-    public Priority getPriority() {
-        return priority;
-    }
-
-    /**
-     * Получает заговолок
-     * @return Заговолок
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * Получает описание
-     * @return Описание
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Получает шаги для воспроизведения проблемы
-     * @return Шаги для воспроизведения проблемы
-     */
-    public String getSteps() {
-        return steps;
-    }
-
-    /**
-     * Получает что происходит в результате
-     * @return Что происходит в результате
-     */
-    public String getResult() {
-        return result;
-    }
-
-    /**
-     * Получает что должно происходить
-     * @return Что должно происходить
-     */
-    public String getShouldBe() {
-        return shouldBe;
-    }
-
-    /**
-     * Получает приложенные материалы
-     * @return Приложенные материалы
-     */
-    public String getMaterials() {
-        return materials;
     }
 }

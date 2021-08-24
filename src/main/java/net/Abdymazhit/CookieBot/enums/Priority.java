@@ -3,7 +3,7 @@ package net.Abdymazhit.CookieBot.enums;
 /**
  * Представляет собой приоритет тикета
  *
- * @version   23.08.2021
+ * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
 public enum Priority {
@@ -36,6 +36,21 @@ public enum Priority {
     public static Priority getPriority(String priorityName) {
         for(Priority priority : Priority.values()) {
             if(priority.getName().equals(priorityName)) {
+                return priority;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Получает приоритет по id
+     * @param id Id тикета
+     * @return Приоритет
+     */
+    public static Priority getPriority(int id) {
+        for(Priority priority : Priority.values()) {
+            if(priority.getId() == id) {
                 return priority;
             }
         }

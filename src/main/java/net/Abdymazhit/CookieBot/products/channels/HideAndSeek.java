@@ -1,5 +1,6 @@
-package net.Abdymazhit.CookieBot.products;
+package net.Abdymazhit.CookieBot.products.channels;
 
+import net.Abdymazhit.CookieBot.products.ProductChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 
@@ -9,7 +10,7 @@ import net.dv8tion.jda.api.entities.Category;
  * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
-public class HideAndSeek extends Product {
+public class HideAndSeek extends ProductChannel {
 
     /**
      * Инициализирует канал продукта мини-игры Hide And Seek

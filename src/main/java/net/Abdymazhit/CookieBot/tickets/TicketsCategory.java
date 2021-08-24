@@ -17,13 +17,13 @@ import java.util.concurrent.ExecutionException;
  * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
-public class Tickets {
+public class TicketsCategory {
 
     /** Категория тикетов */
     private Category category;
 
-    /** Список тикетов */
-    private final List<Ticket> tickets;
+    /** Список каналов тикетов */
+    private final List<TicketChannel> ticketChannels;
 
     /** Последний id тикета */
     private int lastId;
@@ -31,10 +31,10 @@ public class Tickets {
     /**
      * Инициализирует категорию тикетов
      */
-    public Tickets() {
+    public TicketsCategory() {
         deleteCategory();
         createCategory();
-        tickets = new ArrayList<>();
+        ticketChannels = new ArrayList<>();
         lastId = 0;
     }
 
@@ -73,16 +73,24 @@ public class Tickets {
      * @param member Тестер
      */
     public void createTicket(String productName, Member member) {
-        tickets.add(new Ticket(productName, lastId, member));
+        ticketChannels.add(new TicketChannel(productName, lastId, member));
         lastId++;
     }
 
     /**
-     * Удаляет тикет из списка тикетов
-     * @param ticket Тикет
+     * Удаляет канал тикета из списка каналов тикетов
+     * @param ticketChannel Канал тикета
      */
-    public void removeTicket(Ticket ticket) {
-        tickets.remove(ticket);
+    public void removeTicket(TicketChannel ticketChannel) {
+        ticketChannels.remove(ticketChannel);
+    }
+
+    /**
+     * Получает список каналов тикетов
+     * @return Список каналов тикетов
+     */
+    public List<TicketChannel> getTickets() {
+        return ticketChannels;
     }
 
     /**
@@ -91,13 +99,5 @@ public class Tickets {
      */
     public Category getCategory() {
         return category;
-    }
-
-    /**
-     * Получает список тикетов
-     * @return Список тикетов
-     */
-    public List<Ticket> getTickets() {
-        return tickets;
     }
 }

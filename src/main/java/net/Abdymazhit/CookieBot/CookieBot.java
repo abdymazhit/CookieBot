@@ -1,7 +1,7 @@
 package net.Abdymazhit.CookieBot;
 
-import net.Abdymazhit.CookieBot.products.Products;
-import net.Abdymazhit.CookieBot.tickets.Tickets;
+import net.Abdymazhit.CookieBot.products.ProductsCategory;
+import net.Abdymazhit.CookieBot.tickets.TicketsCategory;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.utils.Compression;
@@ -27,10 +27,10 @@ public class CookieBot {
     public static Database database;
 
     /** Категория продуктов */
-    public static Products products;
+    public static ProductsCategory productsCategory;
 
     /** Категория тикетов */
-    public static Tickets tickets;
+    public static TicketsCategory ticketsCategory;
 
     /**
      * Инициализирует бота
@@ -45,8 +45,8 @@ public class CookieBot {
         jda = builder.build().awaitReady();
 
         database = new Database();
-        products = new Products();
-        tickets = new Tickets();
+        productsCategory = new ProductsCategory();
+        ticketsCategory = new TicketsCategory();
 
         jda.addEventListener(new EventsListener()) ;
     }

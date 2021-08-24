@@ -1,10 +1,14 @@
 package net.Abdymazhit.CookieBot;
 
-import net.Abdymazhit.CookieBot.tickets.Ticket;
+import net.Abdymazhit.CookieBot.customs.Ticket;
+import net.Abdymazhit.CookieBot.enums.Priority;
+import net.Abdymazhit.CookieBot.tickets.TicketChannel;
 import net.dv8tion.jda.api.entities.Message;
 
 import java.sql.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,48 +49,79 @@ public class Database {
             return;
         }
 
-        if (connection != null) {
-            System.out.println("Успешное подключение к базе данных");
-        } else {
-            System.out.println("Не удалось подключиться к базе данных");
+        if(connection == null) {
+            throw new IllegalArgumentException("Не удалось подключиться к базе данных");
         }
     }
 
     /**
      * Добавляет запись о тикете
-     * @param ticket Тикет
+     * @param ticketChannel Канал тикета
      */
-    public void addTicket(Ticket ticket) {
-        ticket.getChannel().sendMessage("Тикет отправляется...").submit();
+    public void addTicket(TicketChannel ticketChannel) {
+        ticketChannel.getChannel().sendMessage("Тикет отправляется...").submit();
 
         try {
             PreparedStatement st = connection.prepareStatement("INSERT INTO tickets " +
                     "(product, priority, title, description, steps, result, should_be, materials, created_on) VALUES " +
                     "(?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            st.setString(1, ticket.getProductName());
-            st.setInt(2, ticket.getPriority().getId());
-            st.setString(3, ticket.getTitle());
-            st.setObject(4, ticket.getDescription());
-            st.setObject(5, ticket.getSteps());
-            st.setObject(6, ticket.getResult());
-            st.setObject(7, ticket.getShouldBe());
-            st.setObject(8, ticket.getMaterials());
-            st.setObject(9, Timestamp.from(Instant.now()));
+            st.setString(1, ticketChannel.getTicket().getProductName());
+            st.setInt(2, ticketChannel.getTicket().getPriority().getId());
+            st.setString(3, ticketChannel.getTicket().getTitle());
+            st.setString(4, ticketChannel.getTicket().getDescription());
+            st.setString(5, ticketChannel.getTicket().getSteps());
+            st.setString(6, ticketChannel.getTicket().getResult());
+            st.setString(7, ticketChannel.getTicket().getShouldBe());
+            st.setString(8, ticketChannel.getTicket().getMaterials());
+            st.setTimestamp(9, Timestamp.from(Instant.now()));
             st.executeUpdate();
             st.close();
 
-            ticket.getChannel().sendMessage("Тикет успешно отправлен! Этот канал будет удален через 10 секунд!")
+            ticketChannel.getChannel().sendMessage("Тикет успешно отправлен! Этот канал будет удален через 10 секунд!")
                     .delay(10, TimeUnit.SECONDS).flatMap(Message::delete).submit();
-            ticket.getChannel().delete().submitAfter(10, TimeUnit.SECONDS);
+            ticketChannel.getChannel().delete().submitAfter(10, TimeUnit.SECONDS);
         } catch (SQLException e) {
             e.printStackTrace();
 
-            ticket.getChannel().sendMessage("Произошла ошибка! Тикет не отправлен! " +
+            ticketChannel.getChannel().sendMessage("Произошла ошибка! Тикет не отправлен! " +
                     "Свяжитесь с разработчиком бота! Этот канал будет удален через 60 секунд!")
                     .delay(60, TimeUnit.SECONDS).flatMap(Message::delete).submit();
-            ticket.getChannel().delete().submitAfter(60, TimeUnit.SECONDS);
+            ticketChannel.getChannel().delete().submitAfter(60, TimeUnit.SECONDS);
         }
 
-        CookieBot.tickets.removeTicket(ticket);
+        CookieBot.ticketsCategory.removeTicket(ticketChannel);
+    }
+
+    /**
+     * Получает список тикетов продукта
+     * @param productName Название продукта
+     * @return Список тикетов продукта
+     */
+    public List<Ticket> getProductTickets(String productName) {
+        List<Ticket> tickets = new ArrayList<>();
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "SELECT id, priority, title, created_on FROM tickets WHERE fixed_on is null");
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()) {
+                int id = resultSet.getInt("id");
+                int priority = resultSet.getInt("priority");
+                String title = resultSet.getString("title");
+                Timestamp createdOn = resultSet.getTimestamp("created_on");
+
+                Ticket ticket = new Ticket(productName);
+                ticket.setId(id);
+                ticket.setPriority(Priority.getPriority(priority));
+                ticket.setTitle(title);
+                ticket.setCreatedOn(createdOn);
+                tickets.add(ticket);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return tickets;
     }
 }
