@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Отвечает за работу с базой данных
  *
- * @version   23.08.2021
+ * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
 public class Database {
@@ -61,9 +61,9 @@ public class Database {
 
         try {
             PreparedStatement st = connection.prepareStatement("INSERT INTO tickets " +
-                    "(game, priority, title, description, steps, result, should_be, materials, created_on) VALUES " +
+                    "(product, priority, title, description, steps, result, should_be, materials, created_on) VALUES " +
                     "(?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            st.setString(1, ticket.getMiniGame());
+            st.setString(1, ticket.getProductName());
             st.setInt(2, ticket.getPriority().getId());
             st.setString(3, ticket.getTitle());
             st.setObject(4, ticket.getDescription());

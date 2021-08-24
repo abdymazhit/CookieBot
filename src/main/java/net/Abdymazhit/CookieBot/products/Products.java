@@ -1,4 +1,4 @@
-package net.Abdymazhit.CookieBot.minigames;
+package net.Abdymazhit.CookieBot.products;
 
 import net.Abdymazhit.CookieBot.CookieBot;
 import net.dv8tion.jda.api.Permission;
@@ -11,48 +11,50 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Представляет собой категорию мини-игр
+ * Представляет собой категорию продуктов
  *
- * @version   23.08.2021
+ * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
-public class MiniGames {
+public class Products {
 
-    /** Категория мини-игр */
+    /** Категория продуктов */
     private Category category;
 
-    /** Список мини-игр */
-    private List<MiniGame> miniGames;
+    /** Список продуктов */
+    private List<Product> products;
 
     /**
-     * Инициализирует категорию мини-игр
+     * Инициализирует категорию продуктов
      */
-    public MiniGames() {
+    public Products() {
         deleteCategory();
         createCategory();
-        createMiniGames();
+        createProducts();
     }
 
     /**
-     * Удаляет категорию мини-игр
+     * Удаляет категорию продуктов
      */
     private void deleteCategory() {
         for(Category category : CookieBot.jda.getCategories()) {
-            if(category.getName().equals("Мини-игры")) {
+            if(category.getName().equals("Продукты")) {
                 for(TextChannel textChannel : category.getTextChannels()) {
                     textChannel.delete().submit();
                 }
                 category.delete().submit();
+
+                break;
             }
         }
     }
 
     /**
-     * Создает категорию мини-игр
+     * Создает категорию продуктов
      */
     private void createCategory() {
         try {
-            category = CookieBot.jda.getGuilds().get(0).createCategory("Мини-игры")
+            category = CookieBot.jda.getGuilds().get(0).createCategory("Продукты")
                     .addPermissionOverride(CookieBot.jda.getRolesByName("Тестер", true).get(0), EnumSet.of(Permission.VIEW_CHANNEL), null)
                     .addPermissionOverride(CookieBot.jda.getGuilds().get(0).getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
                     .submit().get();
@@ -62,18 +64,18 @@ public class MiniGames {
     }
 
     /**
-     * Создает список мини-игр
+     * Создает список продуктов
      */
-    private void createMiniGames() {
-        miniGames = new ArrayList<>();
-        miniGames.add(new HideAndSeek(category));
+    private void createProducts() {
+        products = new ArrayList<>();
+        products.add(new HideAndSeek(category));
     }
 
     /**
-     * Получает список мини-игр
-     * @return Список мини-игр
+     * Получает список продуктов
+     * @return Список продуктов
      */
-    public List<MiniGame> getMiniGames() {
-        return miniGames;
+    public List<Product> getProducts() {
+        return products;
     }
 }

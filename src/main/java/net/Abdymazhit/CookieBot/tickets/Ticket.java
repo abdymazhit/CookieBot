@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Представляет собой тикет
  *
- * @version   23.08.2021
+ * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
 public class Ticket {
@@ -29,8 +29,8 @@ public class Ticket {
     /** Стадия тикета */
     private TicketState ticketState;
 
-    /** Название мини-игры */
-    private final String miniGame;
+    /** Название продукта */
+    private final String productName;
 
     /** Приоритет тикета */
     private Priority priority;
@@ -55,12 +55,12 @@ public class Ticket {
 
     /**
      * Инициализирует тикет
-     * @param miniGame Название мини-игры
+     * @param productName Название продукта
      * @param id Id тикета
      * @param member Тестер
      */
-    public Ticket(String miniGame, int id, Member member) {
-        this.miniGame = miniGame;
+    public Ticket(String productName, int id, Member member) {
+        this.productName = productName;
         ticketState = TicketState.FILLING;
         createChannel(id, member);
     }
@@ -92,7 +92,7 @@ public class Ticket {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Новый тикет");
         embedBuilder.setColor(0xFF58B9FF);
-        embedBuilder.addField("Мини-игра", miniGame, false);
+        embedBuilder.addField("Продукт", productName, false);
         embedBuilder.addField("Инструкция по заполнению тикета",
                 "1. Скопируйте бланк снизу\n" +
                         "2. Правильно заполните бланк\n" +
@@ -193,7 +193,7 @@ public class Ticket {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setTitle("Новый тикет");
                 embedBuilder.setColor(0xFF58B9FF);
-                embedBuilder.addField("Мини-игра", miniGame, true);
+                embedBuilder.addField("Продукт", productName, true);
                 embedBuilder.addField("Приоритет", priority.getName(), true);
                 embedBuilder.addField("Заговолок", title, false);
                 embedBuilder.addField("Описание проблемы", description, false);
@@ -249,11 +249,11 @@ public class Ticket {
     }
 
     /**
-     * Получает название мини-игры
-     * @return Название мини-игры
+     * Получает название продукта
+     * @return Название продукта
      */
-    public String getMiniGame() {
-        return miniGame;
+    public String getProductName() {
+        return productName;
     }
 
     /**

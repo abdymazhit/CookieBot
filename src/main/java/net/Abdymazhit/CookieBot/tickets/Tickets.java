@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой категорию тикетов
  *
- * @version   23.08.2021
+ * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
 public class Tickets {
@@ -48,6 +48,8 @@ public class Tickets {
                     textChannel.delete().submit();
                 }
                 category.delete().submit();
+
+                break;
             }
         }
     }
@@ -67,11 +69,11 @@ public class Tickets {
 
     /**
      * Создает новый тикет
-     * @param miniGame Название мини-игры
+     * @param productName Название продукта
      * @param member Тестер
      */
-    public void createTicket(String miniGame, Member member) {
-        tickets.add(new Ticket(miniGame, lastId, member));
+    public void createTicket(String productName, Member member) {
+        tickets.add(new Ticket(productName, lastId, member));
         lastId++;
     }
 

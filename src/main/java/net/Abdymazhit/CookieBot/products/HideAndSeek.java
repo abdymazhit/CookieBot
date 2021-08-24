@@ -1,19 +1,19 @@
-package net.Abdymazhit.CookieBot.minigames;
+package net.Abdymazhit.CookieBot.products;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 
 /**
- * Представляет собой канал мини-игры
+ * Представляет собой канал продукта мини-игры Hide And Seek
  *
- * @version   23.08.2021
+ * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
-public class HideAndSeek extends MiniGame {
+public class HideAndSeek extends Product {
 
     /**
-     * Инициализирует канал мини-игры
-     * @param category Категория мини-игр
+     * Инициализирует канал продукта мини-игры Hide And Seek
+     * @param category Категория продуктов
      */
     public HideAndSeek(Category category) {
         super(category, "hide-and-seek");

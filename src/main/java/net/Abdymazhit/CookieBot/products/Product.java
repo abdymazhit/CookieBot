@@ -1,4 +1,4 @@
-package net.Abdymazhit.CookieBot.minigames;
+package net.Abdymazhit.CookieBot.products;
 
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -7,32 +7,32 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Представляет собой канал мини-игры
+ * Представляет собой канал продукта
  *
- * @version   23.08.2021
+ * @version   24.08.2021
  * @author    Islam Abdymazhit
  */
-public class MiniGame {
+public class Product {
 
-    /** Название канала мини-игры */
+    /** Название канала продукта */
     private final String channelName;
 
-    /** Канал мини-игры */
+    /** Канал продукта */
     private TextChannel channel;
 
     /**
-     * Инициализирует канал мини-игры
-     * @param category Категория мини-игр
-     * @param channelName Название канала мини-игры
+     * Инициализирует канал продукта
+     * @param category Категория продуктов
+     * @param channelName Название канала продукта
      */
-    public MiniGame(Category category, String channelName) {
+    public Product(Category category, String channelName) {
         this.channelName = channelName;
         createChannel(category);
     }
 
     /**
-     * Создает канал мини-игр
-     * @param category Категория мини-игр
+     * Создает канал продукта
+     * @param category Категория продуктов
      */
     private void createChannel(Category category) {
         try {
@@ -43,7 +43,7 @@ public class MiniGame {
     }
 
     /**
-     * Отправляет приветственное сообщение мини-игры
+     * Отправляет приветственное сообщение продукта
      * @param message Приветственное сообщение
      */
     public void sendWelcomeMessage(MessageEmbed message) {
@@ -51,16 +51,16 @@ public class MiniGame {
     }
 
     /**
-     * Получает название канала мини-игры
-     * @return Название канала мини-игры
+     * Получает название канала продукта
+     * @return Название канала продукта
      */
     public String getChannelName() {
         return channelName;
     }
 
     /**
-     * Получает канал мини-игры
-     * @return Канал мини-игры
+     * Получает канал продукта
+     * @return Канал продукта
      */
     public TextChannel getChannel() {
         return channel;
