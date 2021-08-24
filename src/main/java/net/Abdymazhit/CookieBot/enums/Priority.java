@@ -7,10 +7,11 @@ package net.Abdymazhit.CookieBot.enums;
  * @author    Islam Abdymazhit
  */
 public enum Priority {
-    LOW(0, "Низкий"),
-    MEDIUM(1, "Средний"),
-    HIGH(2, "Высокий"),
-    CRITICAL(3, "Критический");
+    TRIVIAL(0, "Тривиальный"),
+    MINOR(1, "Незначительный"),
+    MAJOR(2, "Значительный"),
+    CRITICAL(3, "Критический"),
+    BLOCKER(4, "Блокирующий");
 
     /** Id приоритета */
     private final int id;

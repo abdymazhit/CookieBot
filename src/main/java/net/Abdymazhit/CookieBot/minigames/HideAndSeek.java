@@ -22,13 +22,19 @@ public class HideAndSeek extends MiniGame {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Hide And Seek");
         embedBuilder.setColor(0xFF58B9FF);
-        embedBuilder.setDescription(
-                "В игре есть две роли: Искатели и Прячущиеся. \n" +
-                        "Прячущиеся должны выжить, а искатели \n" +
-                        "попытаться найти прячущихся и убить их. \n" +
-                        "\n" +
-                        "Для подачи отчета о баге введите команду **!ticket**"
-        );
+        embedBuilder.addField("Описание",
+                "В игре есть две роли: Искатели и Прячущиеся. Прячущиеся должны выжить, а искатели " +
+                        "попытаться найти прячущихся и убить их",
+                false);
+
+        embedBuilder.addField("Обратите внимание",
+                "Обязательно просматривайте список багов, прежде чем создавать тикет: вполне возможно " +
+                        "баг уже описан ранее",
+                false);
+
+        embedBuilder.addField("Создание тикета",
+                "Для создания тикета о баге введите команду **!ticket**",
+                false);
         sendWelcomeMessage(embedBuilder.build());
         embedBuilder.clear();
     }
