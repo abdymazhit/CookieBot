@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 /**
  * Представляет собой тикет
  *
- * @version   24.08.2021
+ * @version   25.08.2021
  * @author    Islam Abdymazhit
  */
 public class Ticket {
@@ -17,6 +17,9 @@ public class Ticket {
 
     /** Id тикета */
     private int id;
+
+    /** Id создателя */
+    private String creatorId;
 
     /** Приоритет тикета */
     private Priority priority;
@@ -56,6 +59,22 @@ public class Ticket {
      */
     public String getProductName() {
         return productName;
+    }
+
+    /**
+     * Устанавливает id создателя
+     * @param creatorId Id создателя
+     */
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    /**
+     * Получает id создателя
+     * @return Id создателя
+     */
+    public String getCreatorId() {
+        return creatorId;
     }
 
     /**

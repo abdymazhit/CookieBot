@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой канал продукта
  *
- * @version   24.08.2021
+ * @version   25.08.2021
  * @author    Islam Abdymazhit
  */
 public class ProductChannel {
@@ -107,10 +107,7 @@ public class ProductChannel {
         embedBuilder.addField("Значительные", majorTickets.toString(), false);
         embedBuilder.addField("Критические", criticalTickets.toString(), false);
         embedBuilder.addField("Блокирующие", blockerTickets.toString(), false);
-
-        embedBuilder.addField("Управление тикетом",
-                "Для управления тикетом введите команду **/manage <id>**",
-                false);
+        embedBuilder.addField("Просмотр тикета", "Для просмотра тикета введите команду **/view** `id`", false);
 
         try {
             ticketsMessage = channel.sendMessageEmbeds(embedBuilder.build()).submit().get();

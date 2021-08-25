@@ -7,11 +7,11 @@ import net.Abdymazhit.CookieBot.enums.TicketState;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Представляет собой канал тикета
  *
- * @version   24.08.2021
+ * @version   25.08.2021
  * @author    Islam Abdymazhit
  */
 public class TicketChannel {
@@ -41,6 +41,7 @@ public class TicketChannel {
      */
     public TicketChannel(String productName, int id, Member member) {
         ticket = new Ticket(productName);
+        ticket.setCreatorId(member.getId());
         ticketState = TicketState.FILLING;
         createChannel(id, member);
     }
@@ -55,6 +56,7 @@ public class TicketChannel {
             channel = CookieBot.ticketsCategory.getCategory().createTextChannel("Тикет-" + id)
                     .addPermissionOverride(member, EnumSet.of(Permission.VIEW_CHANNEL), null)
                     .submit().get();
+
             // Удалить канал через 60 минут
             channel.delete().submitAfter(60, TimeUnit.MINUTES);
 
@@ -169,25 +171,17 @@ public class TicketChannel {
             if(priority == null) {
                 channel.sendMessage("Ошибка! Вы указали неправильный приоритет тикета!").submit();
             } else {
+                // Установить параметры тикеты
                 ticket.setPriority(priority);
+                ticket.setCreatedOn(Timestamp.from(Instant.now()));
 
                 // Отправить информацию о тикете
-                EmbedBuilder embedBuilder = new EmbedBuilder();
-                embedBuilder.setTitle("Новый тикет");
-                embedBuilder.setColor(0xFF58B9FF);
-                embedBuilder.addField("Продукт", ticket.getProductName(), true);
-                embedBuilder.addField("Приоритет", priority.getName(), true);
-                embedBuilder.addField("Заговолок", ticket.getTitle(), false);
-                embedBuilder.addField("Описание проблемы", ticket.getDescription(), false);
-                embedBuilder.addField("Шаги для воспроизведения проблемы", ticket.getSteps(), false);
-                embedBuilder.addField("Что происходит в результате", ticket.getResult(), false);
-                embedBuilder.addField("Что должно происходить", ticket.getShouldBe(), false);
-                embedBuilder.addField("Приложенные материалы", ticket.getMaterials(), false);
-                embedBuilder.setTimestamp(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-                channel.sendMessageEmbeds(embedBuilder.build()).submit();
-                embedBuilder.clear();
+                MessageEmbed ticketMessageEmbed = CookieBot.utils.getTicketMessageEmbed(ticket, "Новый тикет");
+                channel.sendMessageEmbeds(ticketMessageEmbed).submit();
 
-                channel.sendMessage("Проверьте правильность заполнения. Если всё правильно, введите команду **!send**. Если вы обнаружили ошибку, введите команду **!cancel** для отмены тикета").submit();
+                // Отправить сообщение о необходимости проверки
+                channel.sendMessage("Проверьте правильность заполнения. Если всё правильно, введите команду **!send**. " +
+                        "Если вы обнаружили ошибку, введите команду **!cancel** для отмены тикета").submit();
 
                 // Установить стадию тикета на отправку
                 ticketState = TicketState.SENDING;
@@ -216,7 +210,7 @@ public class TicketChannel {
      * Отменяет тикет
      */
     private void cancelTicket() {
-        channel.sendMessage("Тикет отменяется...").delay(3, TimeUnit.SECONDS).flatMap(Message::delete).submit();
+        channel.sendMessage("Тикет отменяется...").submit();
         channel.delete().submitAfter(3, TimeUnit.SECONDS);
         CookieBot.ticketsCategory.removeTicket(this);
         ticketState = TicketState.CANCELLING;
