@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Представляет собой канал тикета
  *
- * @version   25.08.2021
+ * @version   28.08.2021
  * @author    Islam Abdymazhit
  */
 public class TicketChannel {
@@ -53,7 +53,7 @@ public class TicketChannel {
      */
     private void createChannel(int id, Member member) {
         try {
-            channel = CookieBot.ticketsCategory.getCategory().createTextChannel("Тикет-" + id)
+            channel = CookieBot.getInstance().ticketsCategory.getCategory().createTextChannel("Тикет-" + id)
                     .addPermissionOverride(member, EnumSet.of(Permission.VIEW_CHANNEL), null)
                     .submit().get();
 
@@ -176,7 +176,7 @@ public class TicketChannel {
                 ticket.setCreatedOn(Timestamp.from(Instant.now()));
 
                 // Отправить информацию о тикете
-                MessageEmbed ticketMessageEmbed = CookieBot.utils.getTicketMessageEmbed(ticket, "Новый тикет");
+                MessageEmbed ticketMessageEmbed = CookieBot.getInstance().utils.getTicketMessageEmbed(ticket, "Новый тикет");
                 channel.sendMessageEmbeds(ticketMessageEmbed).submit();
 
                 // Отправить сообщение о необходимости проверки
@@ -202,7 +202,7 @@ public class TicketChannel {
      * Отправляет тикет
      */
     private void sendTicket() {
-        CookieBot.database.addTicket(this);
+        CookieBot.getInstance().database.addTicket(this);
         ticketState = TicketState.SUCCESS;
     }
 
@@ -212,7 +212,7 @@ public class TicketChannel {
     private void cancelTicket() {
         channel.sendMessage("Тикет отменяется...").submit();
         channel.delete().submitAfter(3, TimeUnit.SECONDS);
-        CookieBot.ticketsCategory.removeTicket(this);
+        CookieBot.getInstance().ticketsCategory.removeTicket(this);
         ticketState = TicketState.CANCELLING;
     }
 

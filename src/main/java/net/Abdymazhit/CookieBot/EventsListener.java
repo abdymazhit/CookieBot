@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Представляет собой слушатель событий
  *
- * @version   25.08.2021
+ * @version   28.08.2021
  * @author    Islam Abdymazhit
  */
 public class EventsListener extends ListenerAdapter {
@@ -41,7 +41,7 @@ public class EventsListener extends ListenerAdapter {
             }
         } else {
             // Проверка, является ли канал каналом продукта
-            for(ProductChannel productChannel : CookieBot.productsCategory.getProductChannels()) {
+            for(ProductChannel productChannel : CookieBot.getInstance().productsCategory.getProductChannels()) {
                 if(productChannel.getChannel().equals(messageChannel)) {
                     // Если сообщение не является сообщением продукта, удалить сообщение через 3 секунды
                     if(!message.equals(productChannel.getWelcomeMessage()) && !message.equals(productChannel.getTicketsMessage())) {
@@ -52,7 +52,7 @@ public class EventsListener extends ListenerAdapter {
                     if(message.getContentRaw().equals("!ticket")) {
                         // Создать новый тикет
                         messageChannel.sendMessage("Создание тикета...").delay(3, TimeUnit.SECONDS).flatMap(Message::delete).submit();
-                        CookieBot.ticketsCategory.createTicket(productChannel.getChannel().getName(), event.getMember());
+                        CookieBot.getInstance().ticketsCategory.createTicket(productChannel.getChannel().getName(), event.getMember());
                     }
 
                     break;
@@ -60,7 +60,7 @@ public class EventsListener extends ListenerAdapter {
             }
 
             // Проверка, является ли канал каналом тикета
-            for(TicketChannel ticketChannel : CookieBot.ticketsCategory.getTickets()) {
+            for(TicketChannel ticketChannel : CookieBot.getInstance().ticketsCategory.getTickets()) {
                 if(ticketChannel.getChannel().equals(messageChannel)) {
                     // Проверка автора сообщений на бота
                     if(!event.getAuthor().isBot()) {
@@ -81,7 +81,7 @@ public class EventsListener extends ListenerAdapter {
         MessageChannel messageChannel = event.getChannel();
 
         // Проверка, является ли канал каналом продукта
-        for(ProductChannel productChannel : CookieBot.productsCategory.getProductChannels()) {
+        for(ProductChannel productChannel : CookieBot.getInstance().productsCategory.getProductChannels()) {
             if(productChannel.getChannel().equals(messageChannel)) {
                 // Проверка команды на /view
                 if(event.getName().equals("view")) {
@@ -91,9 +91,9 @@ public class EventsListener extends ListenerAdapter {
                         int id = Integer.parseInt(idOption.getAsString());
 
                         // Отправить информацию о тикете
-                        Ticket ticket = CookieBot.database.getTicket(id);
+                        Ticket ticket = CookieBot.getInstance().database.getTicket(id);
                         if(ticket != null) {
-                            MessageEmbed ticketMessageEmbed = CookieBot.utils.getTicketMessageEmbed(ticket, "Тикет " + ticket.getId());
+                            MessageEmbed ticketMessageEmbed = CookieBot.getInstance().utils.getTicketMessageEmbed(ticket, "Тикет " + ticket.getId());
 
                             event.replyEmbeds(ticketMessageEmbed)
                                     .addActionRow(
@@ -110,10 +110,10 @@ public class EventsListener extends ListenerAdapter {
                 else if(event.getName().equals("update")) {
                     Member member = event.getMember();
                     if(member != null) {
-                        Role developerRole = CookieBot.jda.getRolesByName("Разработчик", true).get(0);
+                        Role developerRole = CookieBot.getInstance().jda.getRolesByName("Разработчик", true).get(0);
                         if(member.getRoles().contains(developerRole)) {
                             // Обновить все тикеты продуктов
-                            CookieBot.productsCategory.updateProductsTickets();
+                            CookieBot.getInstance().productsCategory.updateProductsTickets();
                             event.reply("Все тикеты продуктов обновлены!").submit();
                         } else {
                             event.reply("У вас нет прав для этого действия!").submit();
@@ -141,16 +141,16 @@ public class EventsListener extends ListenerAdapter {
                 message.delete().submitAfter(3, TimeUnit.SECONDS);
                 event.reply("Команда отменяется...").delay(3, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).submit();
             } else if(event.getComponentId().equals("delete")) {
-                Role developerRole = CookieBot.jda.getRolesByName("Разработчик", true).get(0);
+                Role developerRole = CookieBot.getInstance().jda.getRolesByName("Разработчик", true).get(0);
                 if(member.getRoles().contains(developerRole)) {
-                    boolean isDeleted = CookieBot.database.deleteTicket(event.getMessage());
+                    boolean isDeleted = CookieBot.getInstance().database.deleteTicket(event.getMessage());
 
                     if(isDeleted) {
                         // Удалить сообщение команды
                         message.delete().submit();
 
                         // Обновить тикеты продуктов
-                        CookieBot.productsCategory.updateProductsTickets();
+                        CookieBot.getInstance().productsCategory.updateProductsTickets();
 
                         event.reply("Тикет успешно удален!").delay(3, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).submit();
                     } else {
@@ -163,16 +163,16 @@ public class EventsListener extends ListenerAdapter {
                     event.reply("У вас нет прав для этого действия!").delay(3, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).submit();
                 }
             } else if(event.getComponentId().equals("fix")) {
-                Role developerRole = CookieBot.jda.getRolesByName("Разработчик", true).get(0);
+                Role developerRole = CookieBot.getInstance().jda.getRolesByName("Разработчик", true).get(0);
                 if(member.getRoles().contains(developerRole)) {
-                    boolean isFixed = CookieBot.database.fixTicket(event.getMessage());
+                    boolean isFixed = CookieBot.getInstance().database.fixTicket(event.getMessage());
 
                     if(isFixed) {
                         // Удалить сообщение команды
                         message.delete().submit();
 
                         // Обновить тикеты продуктов
-                        CookieBot.productsCategory.updateProductsTickets();
+                        CookieBot.getInstance().productsCategory.updateProductsTickets();
 
                         event.reply("Статус тикета изменился на исправлен!").delay(3, TimeUnit.SECONDS)
                                 .flatMap(InteractionHook::deleteOriginal).submit();

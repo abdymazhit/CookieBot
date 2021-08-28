@@ -14,19 +14,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Отвечает за работу с базой данных
  *
- * @version   25.08.2021
+ * @version   28.08.2021
  * @author    Islam Abdymazhit
  */
 public class Database {
-
-    /** URL базы данных */
-    private static final String url = "jdbc:postgresql://host:port/database";
-
-    /** Имя пользователя базы данных */
-    private static final String username = "username";
-
-    /** Пароль пользователя базы данных */
-    private static final String password = "password";
 
     /** Подключение к базе данных */
     private Connection connection;
@@ -35,6 +26,8 @@ public class Database {
      * Подключается к базе данных
      */
     public Database() {
+        Config.PostgreSQL config = CookieBot.getInstance().config.postgreSQL;
+
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
@@ -43,7 +36,7 @@ public class Database {
         }
 
         try {
-            connection = DriverManager.getConnection(url, username, password);
+            connection = DriverManager.getConnection(config.url, config.username, config.password);
         } catch (SQLException e) {
             e.printStackTrace();
             return;
@@ -82,7 +75,7 @@ public class Database {
             ticketChannel.getChannel().delete().submitAfter(10, TimeUnit.SECONDS);
 
             // Обновить тикеты продуктов
-            CookieBot.productsCategory.updateProductsTickets();
+            CookieBot.getInstance().productsCategory.updateProductsTickets();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -91,7 +84,7 @@ public class Database {
             ticketChannel.getChannel().delete().submitAfter(60, TimeUnit.SECONDS);
         }
 
-        CookieBot.ticketsCategory.removeTicket(ticketChannel);
+        CookieBot.getInstance().ticketsCategory.removeTicket(ticketChannel);
     }
 
     /**
@@ -100,7 +93,7 @@ public class Database {
      * @return Значение, удален ли тикет
      */
     public boolean deleteTicket(Message message) {
-        int ticketId = CookieBot.utils.getIntByMessage(message);
+        int ticketId = CookieBot.getInstance().utils.getIntByMessage(message);
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("UPDATE tickets SET created_on = null WHERE id = " + ticketId);
@@ -123,7 +116,7 @@ public class Database {
      * @return Значение, исправлен ли тикет
      */
     public boolean fixTicket(Message message) {
-        int ticketId = CookieBot.utils.getIntByMessage(message);
+        int ticketId = CookieBot.getInstance().utils.getIntByMessage(message);
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(

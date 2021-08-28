@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой канал продукта
  *
- * @version   25.08.2021
+ * @version   28.08.2021
  * @author    Islam Abdymazhit
  */
 public class ProductChannel {
@@ -68,7 +68,7 @@ public class ProductChannel {
      * Обновляет все тикеты продукта
      */
     public void updateTickets() {
-        List<Ticket> tickets = CookieBot.database.getProductTickets(channel.getName());
+        List<Ticket> tickets = CookieBot.getInstance().database.getProductTickets(channel.getName());
 
         StringBuilder trivialTickets = new StringBuilder();
         StringBuilder minorTickets = new StringBuilder();

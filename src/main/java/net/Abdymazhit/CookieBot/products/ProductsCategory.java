@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой категорию продуктов
  *
- * @version   24.08.2021
+ * @version   28.08.2021
  * @author    Islam Abdymazhit
  */
 public class ProductsCategory {
@@ -39,7 +39,7 @@ public class ProductsCategory {
      * Удаляет категорию продуктов
      */
     private void deleteCategory() {
-        for(Category category : CookieBot.jda.getCategories()) {
+        for(Category category : CookieBot.getInstance().jda.getCategories()) {
             if(category.getName().equals("Продукты")) {
                 for(TextChannel textChannel : category.getTextChannels()) {
                     textChannel.delete().submit();
@@ -56,9 +56,9 @@ public class ProductsCategory {
      */
     private void createCategory() {
         try {
-            category = CookieBot.jda.getGuilds().get(0).createCategory("Продукты")
-                    .addPermissionOverride(CookieBot.jda.getRolesByName("Тестер", true).get(0), EnumSet.of(Permission.VIEW_CHANNEL), null)
-                    .addPermissionOverride(CookieBot.jda.getGuilds().get(0).getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
+            category = CookieBot.getInstance().jda.getGuilds().get(0).createCategory("Продукты")
+                    .addPermissionOverride(CookieBot.getInstance().jda.getRolesByName("Тестер", true).get(0), EnumSet.of(Permission.VIEW_CHANNEL), null)
+                    .addPermissionOverride(CookieBot.getInstance().jda.getGuilds().get(0).getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
                     .submit().get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();

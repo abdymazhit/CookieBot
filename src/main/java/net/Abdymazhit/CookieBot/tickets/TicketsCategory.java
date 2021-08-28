@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой категорию тикетов
  *
- * @version   24.08.2021
+ * @version   28.08.2021
  * @author    Islam Abdymazhit
  */
 public class TicketsCategory {
@@ -42,7 +42,7 @@ public class TicketsCategory {
      * Удаляет категорию тикетов
      */
     private void deleteCategory() {
-        for(Category category : CookieBot.jda.getCategories()) {
+        for(Category category : CookieBot.getInstance().jda.getCategories()) {
             if(category.getName().equals("Тикеты")) {
                 for(TextChannel textChannel : category.getTextChannels()) {
                     textChannel.delete().submit();
@@ -59,8 +59,8 @@ public class TicketsCategory {
      */
     private void createCategory() {
         try {
-            category = CookieBot.jda.getGuilds().get(0).createCategory("Тикеты")
-                    .addPermissionOverride(CookieBot.jda.getGuilds().get(0).getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
+            category = CookieBot.getInstance().jda.getGuilds().get(0).createCategory("Тикеты")
+                    .addPermissionOverride(CookieBot.getInstance().jda.getGuilds().get(0).getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
                     .submit().get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
