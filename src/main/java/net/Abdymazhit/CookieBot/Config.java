@@ -11,6 +11,9 @@ public class Config {
     /** Токен бота */
     public String token = "BOT-TOKEN";
 
+    /** Токен VimeWorld.ru Public API */
+    public String vimeApiToken  = "VIMEWORLD_API_TOKEN";
+
     /** Параметры базы данных */
     public PostgreSQL postgreSQL = new PostgreSQL();
 

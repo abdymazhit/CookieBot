@@ -1,12 +1,22 @@
 package net.Abdymazhit.CookieBot;
 
 import com.google.gson.Gson;
+import net.Abdymazhit.CookieBot.listeners.MessageReceivedListener;
+import net.Abdymazhit.CookieBot.listeners.UserUpdateOnlineStatusListener;
+import net.Abdymazhit.CookieBot.listeners.buttons.CancelButtonListener;
+import net.Abdymazhit.CookieBot.listeners.buttons.DeleteButtonListener;
+import net.Abdymazhit.CookieBot.listeners.buttons.FixButtonListener;
+import net.Abdymazhit.CookieBot.listeners.commands.AuthCommandListener;
+import net.Abdymazhit.CookieBot.listeners.commands.TicketCommandListener;
+import net.Abdymazhit.CookieBot.listeners.commands.UpdateCommandListener;
+import net.Abdymazhit.CookieBot.listeners.commands.ViewCommandListener;
 import net.Abdymazhit.CookieBot.products.ProductsCategory;
 import net.Abdymazhit.CookieBot.tickets.TicketsCategory;
 import net.Abdymazhit.CookieBot.utils.Utils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.Compression;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
@@ -63,7 +73,9 @@ public class CookieBot {
         readConfig();
 
         JDABuilder builder = JDABuilder.createDefault(config.token);
-        builder.disableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE);
+        builder.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES);
+        builder.enableCache(CacheFlag.CLIENT_STATUS);
+        builder.disableCache(CacheFlag.VOICE_STATE);
         builder.setBulkDeleteSplittingEnabled(false);
         builder.setCompression(Compression.ZLIB);
         jda = builder.build().awaitReady();
@@ -73,12 +85,25 @@ public class CookieBot {
         ticketsCategory = new TicketsCategory();
         utils = new Utils();
 
+        jda.getGuilds().get(0).upsertCommand("auth", "Авторизация")
+                .addOption(OptionType.STRING, "token", "Токен авторизации").submit();
+
         jda.getGuilds().get(0).upsertCommand("view", "Просмотр тикета")
                 .addOption(OptionType.NUMBER, "id", "Id тикета").submit();
 
         jda.getGuilds().get(0).upsertCommand("update", "Обновить все тикеты продуктов").submit();
 
-        jda.addEventListener(new EventsListener());
+        jda.addEventListener(new CancelButtonListener());
+        jda.addEventListener(new DeleteButtonListener());
+        jda.addEventListener(new FixButtonListener());
+
+        jda.addEventListener(new AuthCommandListener());
+        jda.addEventListener(new TicketCommandListener());
+        jda.addEventListener(new UpdateCommandListener());
+        jda.addEventListener(new ViewCommandListener());
+
+        jda.addEventListener(new MessageReceivedListener());
+        jda.addEventListener(new UserUpdateOnlineStatusListener());
     }
 
     /**

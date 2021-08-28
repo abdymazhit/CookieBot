@@ -4,14 +4,21 @@ import net.Abdymazhit.CookieBot.customs.Ticket;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 /**
  * Представляет собой инструменты для упрощения работы
  *
- * @version   25.08.2021
+ * @version   28.08.2021
  * @author    Islam Abdymazhit
  */
 public class Utils {
@@ -67,5 +74,21 @@ public class Utils {
             }
         }
         return -1;
+    }
+
+    /**
+     * Отправляет GET запрос по URL
+     * @param url URL
+     * @return Результат запроса в типе String
+     */
+    public String sendGetRequest(String url) {
+        HttpGet request = new HttpGet(url);
+        try (CloseableHttpClient httpClient = HttpClients.createDefault(); CloseableHttpResponse response = httpClient.execute(request)) {
+            HttpEntity entity = response.getEntity();
+            return EntityUtils.toString(entity);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
