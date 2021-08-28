@@ -9,7 +9,9 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -68,7 +70,7 @@ public class ProductChannel {
      * Обновляет все тикеты продукта
      */
     public void updateTickets() {
-        List<Ticket> tickets = CookieBot.getInstance().database.getProductTickets(channel.getName());
+        List<Ticket> tickets = getProductAvailableTickets();
 
         StringBuilder trivialTickets = new StringBuilder();
         StringBuilder minorTickets = new StringBuilder();
@@ -116,6 +118,39 @@ public class ProductChannel {
         }
 
         embedBuilder.clear();
+    }
+
+    /**
+     * Получает список доступных тикетов продукта
+     * @return Список доступных тикетов продукта
+     */
+    private List<Ticket> getProductAvailableTickets() {
+        List<Ticket> tickets = new ArrayList<>();
+
+        try {
+            Connection connection = CookieBot.getInstance().database.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, ticket_id FROM available_tickets;");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            preparedStatement.close();
+
+            while(resultSet.next()) {
+                int id = resultSet.getInt("id");
+                int priority = resultSet.getInt("priority");
+                String title = resultSet.getString("title");
+                Timestamp createdOn = resultSet.getTimestamp("created_on");
+
+                Ticket ticket = new Ticket(channel.getName());
+                ticket.setId(id);
+                ticket.setPriority(Priority.getPriority(priority));
+                ticket.setTitle(title);
+                ticket.setCreatedOn(createdOn);
+                tickets.add(ticket);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return tickets;
     }
 
     /**

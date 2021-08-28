@@ -1,6 +1,7 @@
 package net.Abdymazhit.CookieBot.products;
 
 import net.Abdymazhit.CookieBot.CookieBot;
+import net.Abdymazhit.CookieBot.enums.Rank;
 import net.Abdymazhit.CookieBot.products.channels.HideAndSeek;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
@@ -57,7 +58,7 @@ public class ProductsCategory {
     private void createCategory() {
         try {
             category = CookieBot.getInstance().jda.getGuilds().get(0).createCategory("Продукты")
-                    .addPermissionOverride(CookieBot.getInstance().jda.getRolesByName("Тестер", true).get(0), EnumSet.of(Permission.VIEW_CHANNEL), null)
+                    .addPermissionOverride(Rank.PLAYER.getRole(), EnumSet.of(Permission.VIEW_CHANNEL), null)
                     .addPermissionOverride(CookieBot.getInstance().jda.getGuilds().get(0).getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
                     .submit().get();
         } catch (InterruptedException | ExecutionException e) {

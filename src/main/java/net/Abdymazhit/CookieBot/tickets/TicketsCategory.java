@@ -70,7 +70,7 @@ public class TicketsCategory {
     /**
      * Создает новый тикет
      * @param productName Название продукта
-     * @param member Тестер
+     * @param member Пользователь
      */
     public void createTicket(String productName, Member member) {
         ticketChannels.add(new TicketChannel(productName, lastId, member));

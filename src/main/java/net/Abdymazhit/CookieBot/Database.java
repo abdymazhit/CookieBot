@@ -1,15 +1,9 @@
 package net.Abdymazhit.CookieBot;
 
-import net.Abdymazhit.CookieBot.customs.Ticket;
-import net.Abdymazhit.CookieBot.enums.Priority;
-import net.Abdymazhit.CookieBot.tickets.TicketChannel;
-import net.dv8tion.jda.api.entities.Message;
-
-import java.sql.*;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Отвечает за работу с базой данных
@@ -44,172 +38,126 @@ public class Database {
 
         if(connection == null) {
             throw new IllegalArgumentException("Не удалось подключиться к базе данных");
+        } else {
+            createTicketsTable();
+            createUncheckedTicketsTable();
+            createCheckedTicketsTable();
+            createAvailableTicketsTable();
+            createDeletedTicketsTable();
+            createFixedTicketsTable();
         }
     }
 
     /**
-     * Добавляет запись о тикете
-     * @param ticketChannel Канал тикета
+     * Создает таблицу тикетов
      */
-    public void addTicket(TicketChannel ticketChannel) {
-        ticketChannel.getChannel().sendMessage("Тикет отправляется...").submit();
-
+    private void createTicketsTable() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO tickets " +
-                    "(creator, product, priority, title, description, steps, result, should_be, materials, created_on) VALUES " +
-                    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            preparedStatement.setString(1, ticketChannel.getTicket().getCreatorId());
-            preparedStatement.setString(2, ticketChannel.getTicket().getProductName());
-            preparedStatement.setInt(3, ticketChannel.getTicket().getPriority().getId());
-            preparedStatement.setString(4, ticketChannel.getTicket().getTitle());
-            preparedStatement.setString(5, ticketChannel.getTicket().getDescription());
-            preparedStatement.setString(6, ticketChannel.getTicket().getSteps());
-            preparedStatement.setString(7, ticketChannel.getTicket().getResult());
-            preparedStatement.setString(8, ticketChannel.getTicket().getShouldBe());
-            preparedStatement.setString(9, ticketChannel.getTicket().getMaterials());
-            preparedStatement.setTimestamp(10, Timestamp.from(Instant.now()));
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS tickets (" +
+                    "id serial not null constraint tickets_pk primary key, " +
+                    "creator varchar(50) not null, " +
+                    "product varchar(50) not null, " +
+                    "priority smallint not null, " +
+                    "title text not null, " +
+                    "description text not null, " +
+                    "steps text not null, " +
+                    "result text not null, " +
+                    "should_be text not null, " +
+                    "materials text not null, " +
+                    "created_on timestamp not null);");
             preparedStatement.executeUpdate();
             preparedStatement.close();
-
-            ticketChannel.getChannel().sendMessage("Тикет успешно отправлен! Этот канал будет удален через 10 секунд!").submit();
-            ticketChannel.getChannel().delete().submitAfter(10, TimeUnit.SECONDS);
-
-            // Обновить тикеты продуктов
-            CookieBot.getInstance().productsCategory.updateProductsTickets();
         } catch (SQLException e) {
             e.printStackTrace();
-
-            ticketChannel.getChannel().sendMessage("Произошла ошибка! Тикет не отправлен! " +
-                    "Свяжитесь с разработчиком бота! Этот канал будет удален через 60 секунд!").submit();
-            ticketChannel.getChannel().delete().submitAfter(60, TimeUnit.SECONDS);
         }
-
-        CookieBot.getInstance().ticketsCategory.removeTicket(ticketChannel);
     }
 
     /**
-     * Удаляет запись о тикете
-     * @param message Сообщение события ButtonClickEvent
-     * @return Значение, удален ли тикет
+     * Создает таблицу непроверенных тикетов
      */
-    public boolean deleteTicket(Message message) {
-        int ticketId = CookieBot.getInstance().utils.getIntByMessage(message);
-
+    private void createUncheckedTicketsTable() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE tickets SET created_on = null WHERE id = " + ticketId);
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS unchecked_tickets (" +
+                    "id serial not null constraint unchecked_tickets_pk primary key, " +
+                    "ticket_id int not null);");
             preparedStatement.executeUpdate();
             preparedStatement.close();
-
-            // Вернуть значение, что тикет удален
-            return true;
         } catch (SQLException e) {
             e.printStackTrace();
-
-            // Вернуть значение, что тикет не удален
-            return false;
         }
     }
 
     /**
-     * Изменяет статус тикета на исправлен
-     * @param message Сообщение события ButtonClickEvent
-     * @return Значение, исправлен ли тикет
+     * Создает таблицу проверенных тикетов
      */
-    public boolean fixTicket(Message message) {
-        int ticketId = CookieBot.getInstance().utils.getIntByMessage(message);
-
+    private void createCheckedTicketsTable() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "UPDATE tickets SET fixed_on = '" + Timestamp.from(Instant.now()) + "' WHERE id = " + ticketId);
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS checked_tickets (" +
+                    "id serial not null constraint checked_tickets_pk primary key, " +
+                    "ticket_id int not null, " +
+                    "checker varchar(50) not null, " +
+                    "checked_on timestamp not null);");
             preparedStatement.executeUpdate();
             preparedStatement.close();
-
-            // Вернуть значение, что тикет не исправлен
-            return true;
         } catch (SQLException e) {
             e.printStackTrace();
-
-            // Вернуть значение, что тикет не исправлен
-            return false;
         }
     }
 
     /**
-     * Получает тикет по id
-     * @param ticketId Id тикета
-     * @return Тикет
+     * Создает таблицу доступных тикетов
      */
-    public Ticket getTicket(int ticketId) {
+    private void createAvailableTicketsTable() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM tickets WHERE id = " + ticketId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS available_tickets (" +
+                    "id serial not null constraint available_tickets_pk primary key, " +
+                    "ticket_id int not null);");
+            preparedStatement.executeUpdate();
             preparedStatement.close();
-
-            while(resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String creatorId = resultSet.getString("creator");
-                String productName = resultSet.getString("product");
-                int priority = resultSet.getInt("priority");
-                String title = resultSet.getString("title");
-                String description = resultSet.getString("description");
-                String steps = resultSet.getString("steps");
-                String result = resultSet.getString("result");
-                String shouldBe = resultSet.getString("should_be");
-                String materials = resultSet.getString("materials");
-                Timestamp createdOn = resultSet.getTimestamp("created_on");
-
-                Ticket ticket = new Ticket(productName);
-                ticket.setId(id);
-                ticket.setCreatorId(creatorId);
-                ticket.setPriority(Priority.getPriority(priority));
-                ticket.setTitle(title);
-                ticket.setDescription(description);
-                ticket.setSteps(steps);
-                ticket.setResult(result);
-                ticket.setShouldBe(shouldBe);
-                ticket.setMaterials(materials);
-                ticket.setCreatedOn(createdOn);
-
-                return ticket;
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return null;
     }
 
     /**
-     * Получает список тикетов продукта
-     * @param productName Название продукта
-     * @return Список тикетов продукта
+     * Создает таблицу удаленных тикетов
      */
-    public List<Ticket> getProductTickets(String productName) {
-        List<Ticket> tickets = new ArrayList<>();
-
+    private void createDeletedTicketsTable() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT id, priority, title, created_on FROM tickets WHERE fixed_on IS NULL AND created_on IS NOT NULL");
-            ResultSet resultSet = preparedStatement.executeQuery();
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS deleted_tickets (" +
+                    "id serial not null constraint deleted_tickets_pk primary key, " +
+                    "ticket_id int not null, " +
+                    "deleter varchar(50) not null, " +
+                    "deleted_at timestamp not null);");
+            preparedStatement.executeUpdate();
             preparedStatement.close();
-
-            while(resultSet.next()) {
-                int id = resultSet.getInt("id");
-                int priority = resultSet.getInt("priority");
-                String title = resultSet.getString("title");
-                Timestamp createdOn = resultSet.getTimestamp("created_on");
-
-                Ticket ticket = new Ticket(productName);
-                ticket.setId(id);
-                ticket.setPriority(Priority.getPriority(priority));
-                ticket.setTitle(title);
-                ticket.setCreatedOn(createdOn);
-                tickets.add(ticket);
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
-        return tickets;
+    /**
+     * Создает таблицу исправленных тикетов
+     */
+    private void createFixedTicketsTable() {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS fixed_tickets (" +
+                    "id serial not null constraint fixed_tickets_pk primary key, " +
+                    "ticket_id int not null, " +
+                    "fixer varchar(50) not null, " +
+                    "fixed_on timestamp not null);");
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Получает подключение к базе данных
+     * @return Подключение к базе данных
+     */
+    public Connection getConnection() {
+        return connection;
     }
 }

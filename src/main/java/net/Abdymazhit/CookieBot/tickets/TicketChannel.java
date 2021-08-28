@@ -10,6 +10,9 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.EnumSet;
@@ -37,7 +40,7 @@ public class TicketChannel {
      * Инициализирует канал тикета
      * @param productName Название продукта
      * @param id Id тикета
-     * @param member Тестер
+     * @param member Пользователь
      */
     public TicketChannel(String productName, int id, Member member) {
         ticket = new Ticket(productName);
@@ -49,7 +52,7 @@ public class TicketChannel {
     /**
      * Создает канал тикету
      * @param id Id тикета
-     * @param member Тестер
+     * @param member Пользователь
      */
     private void createChannel(int id, Member member) {
         try {
@@ -202,7 +205,40 @@ public class TicketChannel {
      * Отправляет тикет
      */
     private void sendTicket() {
-        CookieBot.getInstance().database.addTicket(this);
+        channel.sendMessage("Тикет отправляется...").submit();
+
+        try {
+            Connection connection = CookieBot.getInstance().database.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO tickets " +
+                    "(creator, product, priority, title, description, steps, result, should_be, materials, created_on) VALUES " +
+                    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            preparedStatement.setString(1, ticket.getCreatorId());
+            preparedStatement.setString(2, ticket.getProductName());
+            preparedStatement.setInt(3, ticket.getPriority().getId());
+            preparedStatement.setString(4, ticket.getTitle());
+            preparedStatement.setString(5, ticket.getDescription());
+            preparedStatement.setString(6, ticket.getSteps());
+            preparedStatement.setString(7, ticket.getResult());
+            preparedStatement.setString(8, ticket.getShouldBe());
+            preparedStatement.setString(9, ticket.getMaterials());
+            preparedStatement.setTimestamp(10, Timestamp.from(Instant.now()));
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            channel.sendMessage("Тикет успешно отправлен! Этот канал будет удален через 10 секунд!").submit();
+            channel.delete().submitAfter(10, TimeUnit.SECONDS);
+
+            // Обновить тикеты продуктов
+            CookieBot.getInstance().productsCategory.updateProductsTickets();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            channel.sendMessage("Произошла ошибка! Тикет не отправлен! " +
+                    "Свяжитесь с владельцем! Этот канал будет удален через 60 секунд!").submit();
+            channel.delete().submitAfter(60, TimeUnit.SECONDS);
+        }
+
+        CookieBot.getInstance().ticketsCategory.removeTicket(this);
         ticketState = TicketState.SUCCESS;
     }
 
