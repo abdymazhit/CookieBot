@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой канал продукта
  *
- * @version   28.08.2021
+ * @version   29.08.2021
  * @author    Islam Abdymazhit
  */
 public class ProductChannel {
@@ -129,7 +129,8 @@ public class ProductChannel {
 
         try {
             Connection connection = CookieBot.getInstance().database.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, ticket_id FROM available_tickets;");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT ticket_id FROM available_tickets as t2"
+                    + " WHERE NOT EXISTS (SELECT id, priority, title, created_on FROM tickets as t1 WHERE t1.id = t2.ticket_id)");
             ResultSet resultSet = preparedStatement.executeQuery();
             preparedStatement.close();
 

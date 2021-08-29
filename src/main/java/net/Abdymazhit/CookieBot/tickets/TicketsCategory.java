@@ -5,16 +5,19 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Представляет собой категорию тикетов
  *
- * @version   28.08.2021
+ * @version   29.08.2021
  * @author    Islam Abdymazhit
  */
 public class TicketsCategory {
@@ -24,6 +27,9 @@ public class TicketsCategory {
 
     /** Список каналов тикетов */
     private final List<TicketChannel> ticketChannels;
+
+    /** Текущие создатели тикетов */
+    private final List<Member> currentTicketCreators;
 
     /** Последний id тикета */
     private int lastId;
@@ -35,6 +41,7 @@ public class TicketsCategory {
         deleteCategory();
         createCategory();
         ticketChannels = new ArrayList<>();
+        currentTicketCreators = new ArrayList<>();
         lastId = 0;
     }
 
@@ -69,12 +76,19 @@ public class TicketsCategory {
 
     /**
      * Создает новый тикет
+     * @param event Событие отправки команды
      * @param productName Название продукта
      * @param member Пользователь
      */
-    public void createTicket(String productName, Member member) {
-        ticketChannels.add(new TicketChannel(productName, lastId, member));
-        lastId++;
+    public void createTicket(SlashCommandEvent event, String productName, Member member) {
+        if(!currentTicketCreators.contains(member)) {
+            event.reply("Создание тикета...").delay(3, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).submit();
+            ticketChannels.add(new TicketChannel(productName, lastId, member));
+            currentTicketCreators.add(member);
+            lastId++;
+        } else {
+            event.reply("Вы уже создаете тикет!").delay(3, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).submit();
+        }
     }
 
     /**
@@ -83,13 +97,14 @@ public class TicketsCategory {
      */
     public void removeTicket(TicketChannel ticketChannel) {
         ticketChannels.remove(ticketChannel);
+        currentTicketCreators.remove(ticketChannel.getMember());
     }
 
     /**
      * Получает список каналов тикетов
      * @return Список каналов тикетов
      */
-    public List<TicketChannel> getTickets() {
+    public List<TicketChannel> getTicketsChannels() {
         return ticketChannels;
     }
 

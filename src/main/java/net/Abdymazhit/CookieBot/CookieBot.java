@@ -1,6 +1,7 @@
 package net.Abdymazhit.CookieBot;
 
 import com.google.gson.Gson;
+import net.Abdymazhit.CookieBot.channels.AuthChannel;
 import net.Abdymazhit.CookieBot.listeners.MessageReceivedListener;
 import net.Abdymazhit.CookieBot.listeners.UserUpdateOnlineStatusListener;
 import net.Abdymazhit.CookieBot.listeners.buttons.CancelButtonListener;
@@ -30,7 +31,7 @@ import java.nio.file.Files;
 /**
  * Главный класс, отвечает за инициализацию бота
  *
- * @version   28.08.2021
+ * @version   29.08.2021
  * @author    Islam Abdymazhit
  */
 public class CookieBot {
@@ -86,24 +87,26 @@ public class CookieBot {
         utils = new Utils();
 
         jda.getGuilds().get(0).upsertCommand("auth", "Авторизация")
-                .addOption(OptionType.STRING, "token", "Токен авторизации").submit();
+                .addOption(OptionType.STRING, "token", "Токен авторизации", true).submit();
 
         jda.getGuilds().get(0).upsertCommand("view", "Просмотр тикета")
-                .addOption(OptionType.NUMBER, "id", "Id тикета").submit();
+                .addOption(OptionType.NUMBER, "id", "Id тикета", true).submit();
 
         jda.getGuilds().get(0).upsertCommand("update", "Обновить все тикеты продуктов").submit();
+
+        new AuthChannel();
 
         jda.addEventListener(new CancelButtonListener());
         jda.addEventListener(new DeleteButtonListener());
         jda.addEventListener(new FixButtonListener());
 
+        jda.addEventListener(new MessageReceivedListener());
+        jda.addEventListener(new UserUpdateOnlineStatusListener());
+
         jda.addEventListener(new AuthCommandListener());
         jda.addEventListener(new TicketCommandListener());
         jda.addEventListener(new UpdateCommandListener());
         jda.addEventListener(new ViewCommandListener());
-
-        jda.addEventListener(new MessageReceivedListener());
-        jda.addEventListener(new UserUpdateOnlineStatusListener());
     }
 
     /**

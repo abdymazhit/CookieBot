@@ -22,13 +22,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * Представляет собой канал тикета
  *
- * @version   28.08.2021
+ * @version   29.08.2021
  * @author    Islam Abdymazhit
  */
 public class TicketChannel {
 
     /** Канал тикета */
     private TextChannel channel;
+
+    /** Создатель тикета */
+    private final Member member;
 
     /** Тикет */
     private final Ticket ticket;
@@ -43,6 +46,7 @@ public class TicketChannel {
      * @param member Пользователь
      */
     public TicketChannel(String productName, int id, Member member) {
+        this.member = member;
         ticket = new Ticket(productName);
         ticket.setCreatorId(member.getId());
         ticketState = TicketState.FILLING;
@@ -253,11 +257,11 @@ public class TicketChannel {
     }
 
     /**
-     * Получает тикет
-     * @return Тикет
+     * Получает создателя тикета
+     * @return Создатель тикета
      */
-    public Ticket getTicket() {
-        return ticket;
+    public Member getMember() {
+        return member;
     }
 
     /**

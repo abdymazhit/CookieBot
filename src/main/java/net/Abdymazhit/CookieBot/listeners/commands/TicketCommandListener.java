@@ -6,14 +6,11 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.InteractionHook;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Команда создания тикета
  *
- * @version   28.08.2021
+ * @version   29.08.2021
  * @author    Islam Abdymazhit
  */
 public class TicketCommandListener extends ListenerAdapter {
@@ -33,9 +30,7 @@ public class TicketCommandListener extends ListenerAdapter {
         for(ProductChannel productChannel : CookieBot.getInstance().productsCategory.getProductChannels()) {
             if(productChannel.getChannel().equals(messageChannel)) {
                 // Создать новый тикет
-                event.reply("Создание тикета...").delay(3, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).submit();
-                CookieBot.getInstance().ticketsCategory.createTicket(productChannel.getChannel().getName(), event.getMember());
-
+                CookieBot.getInstance().ticketsCategory.createTicket(event, productChannel.getChannel().getName(), event.getMember());
                 break;
             }
         }

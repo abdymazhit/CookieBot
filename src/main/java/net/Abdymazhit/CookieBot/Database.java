@@ -8,7 +8,7 @@ import java.sql.SQLException;
 /**
  * Отвечает за работу с базой данных
  *
- * @version   28.08.2021
+ * @version   29.08.2021
  * @author    Islam Abdymazhit
  */
 public class Database {
@@ -39,12 +39,30 @@ public class Database {
         if(connection == null) {
             throw new IllegalArgumentException("Не удалось подключиться к базе данных");
         } else {
+            createUsersTable();
             createTicketsTable();
             createUncheckedTicketsTable();
             createCheckedTicketsTable();
             createAvailableTicketsTable();
             createDeletedTicketsTable();
             createFixedTicketsTable();
+        }
+    }
+
+    /**
+     * Создает таблицу пользователей
+     */
+    private void createUsersTable() {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (" +
+                    "id serial not null constraint users_pk primary key, " +
+                    "member_id varchar(50) not null, " +
+                    "username varchar(50) not null, " +
+                    "authorized_in timestamp not null);");
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

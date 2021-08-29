@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Обработчик событий получения сообщений
  *
- * @version   28.08.2021
+ * @version   29.08.2021
  * @author    Islam Abdymazhit
  */
 public class MessageReceivedListener extends ListenerAdapter {
@@ -25,6 +25,10 @@ public class MessageReceivedListener extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         Message message = event.getMessage();
         MessageChannel messageChannel = event.getChannel();
+
+        if(messageChannel.getName().equals("авторизация")) {
+            if(!event.getAuthor().isBot()) message.delete().submit();
+        }
 
         // Проверка сообщения на команду
         if(event.isWebhookMessage()) {
@@ -49,7 +53,7 @@ public class MessageReceivedListener extends ListenerAdapter {
             }
 
             // Проверка, является ли канал каналом тикета
-            for(TicketChannel ticketChannel : CookieBot.getInstance().ticketsCategory.getTickets()) {
+            for(TicketChannel ticketChannel : CookieBot.getInstance().ticketsCategory.getTicketsChannels()) {
                 if(ticketChannel.getChannel().equals(messageChannel)) {
                     // Проверка автора сообщений на бота
                     if(!event.getAuthor().isBot()) {

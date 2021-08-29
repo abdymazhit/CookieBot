@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 /**
  * Обработчик событий изменения статуса онлайна пользователя
  *
- * @version   28.08.2021
+ * @version   29.08.2021
  * @author    Islam Abdymazhit
  */
 public class UserUpdateOnlineStatusListener extends ListenerAdapter {
@@ -26,12 +26,13 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
         Member member = event.getMember();
 
         if(event.getNewOnlineStatus().equals(OnlineStatus.OFFLINE)) return;
+        if(!member.getRoles().contains(Rank.PLAYER.getRole())) return;
 
         String userInfo = CookieBot.getInstance().utils.sendGetRequest("https://api.vimeworld.ru/user/name/" + member.getNickname()
                 + "?token=" + CookieBot.getInstance().config.vimeApiToken);
         if(userInfo == null) return;
 
-        JsonObject infoObject = new JsonParser().parse(userInfo).getAsJsonArray().get(0).getAsJsonObject();
+        JsonObject infoObject = JsonParser.parseString(userInfo).getAsJsonArray().get(0).getAsJsonObject();
 
         // Обновить ранг пользователя
         Rank rank = Rank.valueOf(infoObject.get("rank").getAsString());
