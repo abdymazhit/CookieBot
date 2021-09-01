@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 /**
  * Команда обновления тикетов продуктов
  *
- * @version   28.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class UpdateCommandListener extends ListenerAdapter {
@@ -29,16 +29,17 @@ public class UpdateCommandListener extends ListenerAdapter {
 
         // Проверка, является ли канал каналом продукта
         for(ProductChannel productChannel : CookieBot.getInstance().productsCategory.getProductChannels()) {
-            if(productChannel.getChannel().equals(messageChannel)) {
+            if(productChannel.channel.equals(messageChannel)) {
                 if(member.getRoles().contains(Rank.OWNER.getRole())) {
-                    // Обновить все тикеты продуктов
-                    CookieBot.getInstance().productsCategory.updateProductsTickets();
-                    event.reply("Все тикеты продуктов обновлены!").submit();
-                } else {
-                    event.reply("У вас нет прав для этого действия!").submit();
-                }
+                    // Обновить список тикетов
+                    CookieBot.getInstance().productsCategory.updateProductsAvailableTicketsList();
+                    CookieBot.getInstance().separateChannels.getVerificationChannel().updatePendingVerificationTicketsList();
 
-                break;
+                    event.reply("Все списки тикетов обновлены!").setEphemeral(true).queue();
+                } else {
+                    event.reply("У вас нет прав для этого действия!").setEphemeral(true).queue();
+                }
+                return;
             }
         }
     }

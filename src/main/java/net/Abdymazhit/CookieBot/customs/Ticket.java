@@ -7,27 +7,27 @@ import java.sql.Timestamp;
 /**
  * Представляет собой тикет
  *
- * @version   25.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class Ticket {
 
-    /** Название продукта */
-    private final String productName;
-
     /** Id тикета */
     private int id;
 
-    /** Id создателя */
-    private String creatorId;
+    /** Имя создателя тикета */
+    private String creator;
+
+    /** Название продукта */
+    private String productName;
 
     /** Приоритет тикета */
     private Priority priority;
 
-    /** Заговолок */
+    /** Заговолок тикета */
     private String title;
 
-    /** Описание */
+    /** Описание тикета */
     private String description;
 
     /** Шаги для воспроизведения проблемы */
@@ -46,38 +46,6 @@ public class Ticket {
     private Timestamp createdOn;
 
     /**
-     * Инициализирует тикет
-     * @param productName Название продукта
-     */
-    public Ticket(String productName) {
-        this.productName = productName;
-    }
-
-    /**
-     * Получает название продукта
-     * @return Название продукта
-     */
-    public String getProductName() {
-        return productName;
-    }
-
-    /**
-     * Устанавливает id создателя
-     * @param creatorId Id создателя
-     */
-    public void setCreatorId(String creatorId) {
-        this.creatorId = creatorId;
-    }
-
-    /**
-     * Получает id создателя
-     * @return Id создателя
-     */
-    public String getCreatorId() {
-        return creatorId;
-    }
-
-    /**
      * Устанавливает id тикету
      * @param id Id тикета
      */
@@ -91,6 +59,38 @@ public class Ticket {
      */
     public int getId() {
         return id;
+    }
+
+    /**
+     * Устанавливает имя создателя тикета
+     * @param creator Имя создателя тикета
+     */
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
+    /**
+     * Получает имя создателя тикета
+     * @return Имя создателя тикета
+     */
+    public String getCreator() {
+        return creator;
+    }
+
+    /**
+     * Устанавливает название продукта
+     * @param productName Название продукта
+     */
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    /**
+     * Получает название продукта
+     * @return Название продукта
+     */
+    public String getProductName() {
+        return productName;
     }
 
     /**
@@ -110,32 +110,32 @@ public class Ticket {
     }
 
     /**
-     * Устанавливает заговолок
-     * @param title Заговолок
+     * Устанавливает заговолок тикета
+     * @param title Заговолок тикета
      */
     public void setTitle(String title) {
         this.title = title;
     }
 
     /**
-     * Получает заговолок
-     * @return Заговолок
+     * Получает заговолок тикета
+     * @return Заговолок тикета
      */
     public String getTitle() {
         return title;
     }
 
     /**
-     * Устанавливает описание
-     * @param description Описание
+     * Устанавливает описание тикета
+     * @param description Описание тикета
      */
     public void setDescription(String description) {
         this.description = description;
     }
 
     /**
-     * Получает описание
-     * @return Описание
+     * Получает описание тикета
+     * @return Описание тикета
      */
     public String getDescription() {
         return description;

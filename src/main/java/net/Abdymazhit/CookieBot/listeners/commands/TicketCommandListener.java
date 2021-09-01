@@ -1,6 +1,7 @@
 package net.Abdymazhit.CookieBot.listeners.commands;
 
 import net.Abdymazhit.CookieBot.CookieBot;
+import net.Abdymazhit.CookieBot.customs.Ticket;
 import net.Abdymazhit.CookieBot.products.ProductChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -10,7 +11,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 /**
  * Команда создания тикета
  *
- * @version   29.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class TicketCommandListener extends ListenerAdapter {
@@ -28,10 +29,13 @@ public class TicketCommandListener extends ListenerAdapter {
 
         // Проверка, является ли канал каналом продукта
         for(ProductChannel productChannel : CookieBot.getInstance().productsCategory.getProductChannels()) {
-            if(productChannel.getChannel().equals(messageChannel)) {
-                // Создать новый тикет
-                CookieBot.getInstance().ticketsCategory.createTicket(event, productChannel.getChannel().getName(), event.getMember());
-                break;
+            if(productChannel.channel.equals(messageChannel)) {
+                Ticket ticket = new Ticket();
+                ticket.setProductName(messageChannel.getName());
+
+                // Создать канал для создания тикета
+                CookieBot.getInstance().ticketsCategory.createTicketCreationChannel(event, ticket, member);
+                return;
             }
         }
     }

@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Команда авторизации
  *
- * @version   29.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class AuthCommandListener extends ListenerAdapter {
@@ -32,22 +32,25 @@ public class AuthCommandListener extends ListenerAdapter {
         MessageChannel messageChannel = event.getChannel();
         Member member = event.getMember();
 
-        if(!messageChannel.getName().equals("авторизация")) return;
         if(!event.getName().equals("auth")) return;
+        if(!messageChannel.equals(CookieBot.getInstance().separateChannels.getAuthChannel().channel)) return;
         if(member == null) return;
 
         OptionMapping tokenOption = event.getOption("token");
-        if(tokenOption == null) return;
+        if(tokenOption == null) {
+            event.reply("Ошибка! Токен авторизации не найден!").setEphemeral(true).queue();
+            return;
+        }
 
         if(member.getRoles().contains(Rank.PLAYER.getRole()))  {
-            event.reply("Ошибка! Вы уже авторизованы!").setEphemeral(true).submit();
+            event.reply("Ошибка! Вы уже авторизованы!").setEphemeral(true).queue();
             return;
         }
 
         String token = tokenOption.getAsString().replace("https://api.vime.world/web/token/", "");
         String authInfo = CookieBot.getInstance().utils.sendGetRequest("https://api.vimeworld.ru/misc/token/" + token);
         if(authInfo == null) {
-            event.reply("Ошибка! Неверный токен авторизации!").setEphemeral(true).submit();
+            event.reply("Ошибка! Неверный токен авторизации!").setEphemeral(true).queue();
             return;
         }
 
@@ -55,25 +58,25 @@ public class AuthCommandListener extends ListenerAdapter {
 
         JsonElement validElement = authObject.get("valid");
         if(validElement == null) {
-            event.reply("Ошибка! Неверный токен авторизации!").setEphemeral(true).submit();
+            event.reply("Ошибка! Токен авторизации не действителен!").setEphemeral(true).queue();
             return;
         }
 
         boolean isValid = validElement.getAsBoolean();
         if(!isValid) {
-            event.reply("Ошибка! Неверный токен авторизации или время действия токена истекло!").setEphemeral(true).submit();
+            event.reply("Ошибка! Неверный токен авторизации или время действия токена истекло!").setEphemeral(true).queue();
             return;
         }
 
         String type = authObject.get("type").getAsString();
         if(!type.equals("AUTH")) {
-            event.reply("Ошибка! Тип токена должен быть AUTH!").setEphemeral(true).submit();
+            event.reply("Ошибка! Тип токена должен быть AUTH!").setEphemeral(true).queue();
             return;
         }
 
         JsonElement ownerElement = authObject.get("owner");
         if(ownerElement.isJsonNull()) {
-            event.reply("Ошибка! Владелец токена не найден!").setEphemeral(true).submit();
+            event.reply("Ошибка! Владелец токена не найден!").setEphemeral(true).queue();
             return;
         }
 
@@ -82,23 +85,24 @@ public class AuthCommandListener extends ListenerAdapter {
         Rank rank = Rank.valueOf(ownerObject.get("rank").getAsString());
 
         boolean isAdded = addUser(member.getId(), username);
-        if(isAdded) {
-            // Изменить пользователю ник
-            if(!member.isOwner()) {
-                member.modifyNickname(username).submit();
-            }
-
-            // Изменить роль пользователя
-            if(!rank.equals(Rank.PLAYER)) {
-                CookieBot.getInstance().jda.getGuilds().get(0).addRoleToMember(member, rank.getRole()).submit();
-            }
-            CookieBot.getInstance().jda.getGuilds().get(0).addRoleToMember(member, Rank.PLAYER.getRole()).submit();
-
-            // Отправить сообщение о успешной авторизации
-            event.reply("Вы успешно авторизовались! Ваш ник: " + username + ", ранг: " + rank.getName()).setEphemeral(true).submit();
-        } else {
-            event.reply("Ошибка! Попробуйте авторизоваться позже.").setEphemeral(true).submit();
+        if(!isAdded) {
+            event.reply("Ошибка! Попробуйте авторизоваться позже!").setEphemeral(true).queue();
+            return;
         }
+
+        // Изменить пользователю ник
+        if(CookieBot.getInstance().guild.getSelfMember().canInteract(member)) {
+            member.modifyNickname(username).queue();
+        }
+
+        // Изменить роль пользователя
+        if(!rank.equals(Rank.PLAYER)) {
+            CookieBot.getInstance().guild.addRoleToMember(member, rank.getRole()).queue();
+        }
+        CookieBot.getInstance().guild.addRoleToMember(member, Rank.PLAYER.getRole()).queue();
+
+        // Отправить сообщение о успешной авторизации
+        event.reply("Вы успешно авторизовались! Ваш ник: " + username + ", ранг: " + rank.getName()).setEphemeral(true).queue();
     }
 
     /**
@@ -117,17 +121,17 @@ public class AuthCommandListener extends ListenerAdapter {
 
             if(resultSet.next()) {
                 String member_id = resultSet.getString("member_id");
-                Member member = CookieBot.getInstance().jda.getGuilds().get(0).retrieveMemberById(member_id).submit().get();
+                Member member = CookieBot.getInstance().guild.retrieveMemberById(member_id).submit().get();
 
                 if(member != null) {
                     // Удалить роли старого пользователя
                     for(Role role : member.getRoles()) {
-                        CookieBot.getInstance().jda.getGuilds().get(0).removeRoleFromMember(member, role).submit();
+                        CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
                     }
 
                     // Изменить ник старого пользователя
-                    if(!member.isOwner()) {
-                        member.modifyNickname(member.getId()).submit();
+                    if(CookieBot.getInstance().guild.getSelfMember().canInteract(member)) {
+                        member.modifyNickname(member.getId()).queue();
                     }
                 }
 
@@ -150,7 +154,7 @@ public class AuthCommandListener extends ListenerAdapter {
         } catch (SQLException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
 
-            // Вернуть значение, что пользователь не добавлен
+            // Вернуть значение, что произошла ошибка
             return false;
         }
     }

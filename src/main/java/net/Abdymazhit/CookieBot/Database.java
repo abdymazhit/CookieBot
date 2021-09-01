@@ -1,14 +1,15 @@
 package net.Abdymazhit.CookieBot;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import net.Abdymazhit.CookieBot.customs.Config;
+import net.Abdymazhit.CookieBot.customs.Ticket;
+import net.Abdymazhit.CookieBot.enums.Priority;
+
+import java.sql.*;
 
 /**
  * Отвечает за работу с базой данных
  *
- * @version   29.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class Database {
@@ -38,15 +39,24 @@ public class Database {
 
         if(connection == null) {
             throw new IllegalArgumentException("Не удалось подключиться к базе данных");
-        } else {
-            createUsersTable();
-            createTicketsTable();
-            createUncheckedTicketsTable();
-            createCheckedTicketsTable();
-            createAvailableTicketsTable();
-            createDeletedTicketsTable();
-            createFixedTicketsTable();
         }
+
+//        Создать таблицы, только при необходимости
+//        createTables();
+    }
+
+    /**
+     * Создает таблицы
+     */
+    private void createTables() {
+        createUsersTable();
+        createTicketsTable();
+        createPendingVerificationTicketsTable();
+        createUnverifiedTicketsTable();
+        createVerifiedTicketsTable();
+        createAvailableTicketsTable();
+        createDeletedTicketsTable();
+        createFixedTicketsTable();
     }
 
     /**
@@ -91,12 +101,12 @@ public class Database {
     }
 
     /**
-     * Создает таблицу непроверенных тикетов
+     * Создает таблицу ожидающих верификации тикетов
      */
-    private void createUncheckedTicketsTable() {
+    private void createPendingVerificationTicketsTable() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS unchecked_tickets (" +
-                    "id serial not null constraint unchecked_tickets_pk primary key, " +
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS pending_verification_tickets (" +
+                    "id serial not null constraint pending_verification_tickets_pk primary key, " +
                     "ticket_id int not null);");
             preparedStatement.executeUpdate();
             preparedStatement.close();
@@ -106,12 +116,29 @@ public class Database {
     }
 
     /**
-     * Создает таблицу проверенных тикетов
+     * Создает таблицу не верифицированных тикетов
      */
-    private void createCheckedTicketsTable() {
+    private void createUnverifiedTicketsTable() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS checked_tickets (" +
-                    "id serial not null constraint checked_tickets_pk primary key, " +
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS unverified_tickets (" +
+                    "id serial not null constraint unverified_tickets_pk primary key, " +
+                    "ticket_id int not null, " +
+                    "checker varchar(50) not null, " +
+                    "checked_on timestamp not null);");
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Создает таблицу верифицированных тикетов
+     */
+    private void createVerifiedTicketsTable() {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS verified_tickets (" +
+                    "id serial not null constraint verified_tickets_pk primary key, " +
                     "ticket_id int not null, " +
                     "checker varchar(50) not null, " +
                     "checked_on timestamp not null);");
@@ -169,6 +196,52 @@ public class Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Получает тикет
+     * @param sql SQL запрос
+     * @return Тикет
+     */
+    public Ticket getTicket(String sql) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            preparedStatement.close();
+
+            if(resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String creatorId = resultSet.getString("creator");
+                String productName = resultSet.getString("product");
+                int priority = resultSet.getInt("priority");
+                String title = resultSet.getString("title");
+                String description = resultSet.getString("description");
+                String steps = resultSet.getString("steps");
+                String result = resultSet.getString("result");
+                String shouldBe = resultSet.getString("should_be");
+                String materials = resultSet.getString("materials");
+                Timestamp createdOn = resultSet.getTimestamp("created_on");
+
+                Ticket ticket = new Ticket();
+                ticket.setId(id);
+                ticket.setCreator(creatorId);
+                ticket.setProductName(productName);
+                ticket.setPriority(Priority.getPriority(priority));
+                ticket.setTitle(title);
+                ticket.setDescription(description);
+                ticket.setSteps(steps);
+                ticket.setResult(result);
+                ticket.setShouldBe(shouldBe);
+                ticket.setMaterials(materials);
+                ticket.setCreatedOn(createdOn);
+
+                return ticket;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**

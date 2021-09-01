@@ -1,19 +1,17 @@
 package net.Abdymazhit.CookieBot.listeners;
 
 import net.Abdymazhit.CookieBot.CookieBot;
+import net.Abdymazhit.CookieBot.customs.TicketChannel;
 import net.Abdymazhit.CookieBot.products.ProductChannel;
-import net.Abdymazhit.CookieBot.tickets.TicketChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Обработчик событий получения сообщений
  *
- * @version   29.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class MessageReceivedListener extends ListenerAdapter {
@@ -26,41 +24,35 @@ public class MessageReceivedListener extends ListenerAdapter {
         Message message = event.getMessage();
         MessageChannel messageChannel = event.getChannel();
 
-        if(messageChannel.getName().equals("авторизация")) {
-            if(!event.getAuthor().isBot()) message.delete().submit();
+        if(messageChannel.equals(CookieBot.getInstance().separateChannels.getAuthChannel().channel)) {
+            if(!event.getAuthor().isBot()) {
+                message.delete().queue();
+                return;
+            }
+        } else if(messageChannel.equals(CookieBot.getInstance().separateChannels.getVerificationChannel().channel)) {
+            if(!event.getAuthor().isBot()) {
+                message.delete().queue();
+                return;
+            }
         }
 
-        // Проверка сообщения на команду
-        if(event.isWebhookMessage()) {
-            // Проверка команды на ошибку
-            if(message.getEmbeds().isEmpty()) {
-                message.delete().submitAfter(5, TimeUnit.SECONDS);
-            } else {
-                // Удалить команду через 5 минут, если взаимодействия не было
-                message.delete().submitAfter(5, TimeUnit.MINUTES);
-            }
-        } else {
-            // Проверка, является ли канал каналом продукта
-            for(ProductChannel productChannel : CookieBot.getInstance().productsCategory.getProductChannels()) {
-                if(productChannel.getChannel().equals(messageChannel)) {
-                    // Если сообщение не является сообщением продукта, удалить сообщение через 3 секунды
-                    if(!message.equals(productChannel.getWelcomeMessage()) && !message.equals(productChannel.getTicketsMessage())) {
-                        message.delete().submitAfter(3, TimeUnit.SECONDS);
-                    }
-
-                    break;
+        // Проверка, является ли канал каналом продукта
+        for(ProductChannel productChannel : CookieBot.getInstance().productsCategory.getProductChannels()) {
+            if(productChannel.channel.equals(messageChannel)) {
+                if(!event.getAuthor().isBot()) {
+                    message.delete().queue();
+                    return;
                 }
             }
+        }
 
-            // Проверка, является ли канал каналом тикета
-            for(TicketChannel ticketChannel : CookieBot.getInstance().ticketsCategory.getTicketsChannels()) {
-                if(ticketChannel.getChannel().equals(messageChannel)) {
-                    // Проверка автора сообщений на бота
-                    if(!event.getAuthor().isBot()) {
-                        ticketChannel.onMessageReceived(message.getContentRaw());
-                    }
-
-                    break;
+        // Проверка, является ли канал каналом тикета
+        for(TicketChannel ticketChannel : CookieBot.getInstance().ticketsCategory.getTicketsChannels()) {
+            if(ticketChannel.channel.equals(messageChannel)) {
+                // Проверка автора сообщений на бота
+                if(!event.getAuthor().isBot()) {
+                    ticketChannel.onMessageReceived(message.getContentRaw());
+                    return;
                 }
             }
         }

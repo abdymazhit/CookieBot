@@ -3,7 +3,7 @@ package net.Abdymazhit.CookieBot.enums;
 /**
  * Представляет собой приоритет тикета
  *
- * @version   24.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public enum Priority {
@@ -39,7 +39,6 @@ public enum Priority {
                 return priority;
             }
         }
-
         return null;
     }
 
@@ -54,7 +53,6 @@ public enum Priority {
                 return priority;
             }
         }
-
         return null;
     }
 

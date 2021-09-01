@@ -1,13 +1,13 @@
 package net.Abdymazhit.CookieBot.products;
 
 import net.Abdymazhit.CookieBot.CookieBot;
+import net.Abdymazhit.CookieBot.customs.Channel;
 import net.Abdymazhit.CookieBot.customs.Ticket;
 import net.Abdymazhit.CookieBot.enums.Priority;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -18,19 +18,13 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой канал продукта
  *
- * @version   29.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
-public class ProductChannel {
+public class ProductChannel extends Channel {
 
-    /** Канал продукта */
-    private TextChannel channel;
-
-    /** Приветственное сообщение канала продукта */
-    private Message welcomeMessage;
-
-    /** Сообщение о тикетах продукта */
-    private Message ticketsMessage;
+    /** Сообщение о доступных тикетах продукта */
+    private Message availableTicketsMessage;
 
     /**
      * Инициализирует канал продукта
@@ -38,38 +32,25 @@ public class ProductChannel {
      * @param channelName Название канала продукта
      */
     public ProductChannel(Category category, String channelName) {
-        createChannel(category, channelName);
+        createChannel(category.getName(), channelName);
     }
 
     /**
-     * Создает канал продукта
-     * @param category Категория продуктов
-     * @param channelName Название канала продукта
+     * Отправляет сообщение канала продукта
+     * @param messageEmbed Сообщение канала продукта
      */
-    private void createChannel(Category category, String channelName) {
+    public void sendChannelMessage(MessageEmbed messageEmbed) {
         try {
-            channel = category.createTextChannel(channelName).submit().get();
+            channel.sendMessageEmbeds(messageEmbed).submit().get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * Отправляет приветственное сообщение продукта
-     * @param messageEmbed Приветственное сообщение
+     * Обновляет список доступных тикетов продукта
      */
-    public void sendWelcomeMessage(MessageEmbed messageEmbed) {
-        try {
-            welcomeMessage = channel.sendMessageEmbeds(messageEmbed).submit().get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Обновляет все тикеты продукта
-     */
-    public void updateTickets() {
+    public void updateAvailableTicketsList() {
         List<Ticket> tickets = getProductAvailableTickets();
 
         StringBuilder trivialTickets = new StringBuilder();
@@ -97,10 +78,6 @@ public class ProductChannel {
             }
         }
 
-        if(ticketsMessage != null) {
-            channel.deleteMessageById(ticketsMessage.getId()).submit();
-        }
-
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Известные баги");
         embedBuilder.setColor(0xFF58B9FF);
@@ -109,12 +86,17 @@ public class ProductChannel {
         embedBuilder.addField("Значительные", majorTickets.toString(), false);
         embedBuilder.addField("Критические", criticalTickets.toString(), false);
         embedBuilder.addField("Блокирующие", blockerTickets.toString(), false);
-        embedBuilder.addField("Просмотр тикета", "Для просмотра тикета введите команду **/view** `id`", false);
+        embedBuilder.addField("Просмотр тикета", "Для просмотра тикета введите команду `/view id`", false);
 
-        try {
-            ticketsMessage = channel.sendMessageEmbeds(embedBuilder.build()).submit().get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+        if(availableTicketsMessage != null) {
+            availableTicketsMessage.editMessageEmbeds(embedBuilder.build()).queue();
+        } else {
+            try {
+                availableTicketsMessage = channel.sendMessageEmbeds(embedBuilder.build()).submit().get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+
         }
 
         embedBuilder.clear();
@@ -129,8 +111,8 @@ public class ProductChannel {
 
         try {
             Connection connection = CookieBot.getInstance().database.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT ticket_id FROM available_tickets as t2"
-                    + " WHERE NOT EXISTS (SELECT id, priority, title, created_on FROM tickets as t1 WHERE t1.id = t2.ticket_id)");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT T1.id, T1.priority, T1.title, T1.created_on " +
+                    "FROM tickets T1 JOIN available_tickets T2 ON T1.id = T2.ticket_id;");
             ResultSet resultSet = preparedStatement.executeQuery();
             preparedStatement.close();
 
@@ -140,7 +122,7 @@ public class ProductChannel {
                 String title = resultSet.getString("title");
                 Timestamp createdOn = resultSet.getTimestamp("created_on");
 
-                Ticket ticket = new Ticket(channel.getName());
+                Ticket ticket = new Ticket();
                 ticket.setId(id);
                 ticket.setPriority(Priority.getPriority(priority));
                 ticket.setTitle(title);
@@ -152,29 +134,5 @@ public class ProductChannel {
         }
 
         return tickets;
-    }
-
-    /**
-     * Получает приветственное сообщение канала продукта
-     * @return Приветственное сообщение канала продукта
-     */
-    public Message getWelcomeMessage() {
-        return welcomeMessage;
-    }
-
-    /**
-     * Получает сообщение о тикетах продукта
-     * @return Сообщение о тикетах продукта
-     */
-    public Message getTicketsMessage() {
-        return ticketsMessage;
-    }
-
-    /**
-     * Получает канал продукта
-     * @return Канал продукта
-     */
-    public TextChannel getChannel() {
-        return channel;
     }
 }

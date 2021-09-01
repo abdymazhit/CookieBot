@@ -1,9 +1,9 @@
-package net.Abdymazhit.CookieBot;
+package net.Abdymazhit.CookieBot.customs;
 
 /**
- * Файл конфигурации
+ * Представляет собой файл конфигурации
  *
- * @version   28.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class Config {

@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.Role;
 /**
  * Представляет собой ранг пользователя
  *
- * @version   28.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public enum Rank {
@@ -36,7 +36,7 @@ public enum Rank {
      */
     Rank(String name) {
         this.name = name;
-        this.role = CookieBot.getInstance().jda.getRolesByName(name, true).get(0);
+        this.role = CookieBot.getInstance().guild.getRolesByName(name, true).get(0);
     }
 
     /**

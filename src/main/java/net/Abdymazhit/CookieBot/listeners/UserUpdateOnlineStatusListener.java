@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 /**
  * Обработчик событий изменения статуса онлайна пользователя
  *
- * @version   29.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class UserUpdateOnlineStatusListener extends ListenerAdapter {
@@ -28,7 +28,14 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
         if(event.getNewOnlineStatus().equals(OnlineStatus.OFFLINE)) return;
         if(!member.getRoles().contains(Rank.PLAYER.getRole())) return;
 
-        String userInfo = CookieBot.getInstance().utils.sendGetRequest("https://api.vimeworld.ru/user/name/" + member.getNickname()
+        String memberName;
+        if(member.getNickname() != null) {
+            memberName =  member.getNickname();
+        } else {
+            memberName =  member.getEffectiveName();
+        }
+
+        String userInfo = CookieBot.getInstance().utils.sendGetRequest("https://api.vimeworld.ru/user/name/" + memberName
                 + "?token=" + CookieBot.getInstance().config.vimeApiToken);
         if(userInfo == null) return;
 
@@ -38,13 +45,22 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
         Rank rank = Rank.valueOf(infoObject.get("rank").getAsString());
         if(!member.getRoles().contains(rank.getRole())) {
             for(Role role : member.getRoles()) {
-                CookieBot.getInstance().jda.getGuilds().get(0).removeRoleFromMember(member, role).submit();
+                CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
             }
 
             if(!rank.equals(Rank.PLAYER)) {
-                CookieBot.getInstance().jda.getGuilds().get(0).addRoleToMember(member, rank.getRole()).submit();
+                CookieBot.getInstance().guild.addRoleToMember(member, rank.getRole()).queue();
             }
-            CookieBot.getInstance().jda.getGuilds().get(0).addRoleToMember(member, Rank.PLAYER.getRole()).submit();
+
+            CookieBot.getInstance().guild.addRoleToMember(member, Rank.PLAYER.getRole()).queue();
+        } else {
+            if(rank.equals(Rank.PLAYER)) {
+                for(Role role : member.getRoles()) {
+                    if(!role.equals(Rank.PLAYER.getRole())) {
+                        CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
+                    }
+                }
+            }
         }
     }
 }

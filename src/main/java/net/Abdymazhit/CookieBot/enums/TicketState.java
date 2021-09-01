@@ -1,9 +1,9 @@
 package net.Abdymazhit.CookieBot.enums;
 
 /**
- * Представляет собой стадию тикета
+ * Представляет собой стадию создания тикета
  *
- * @version   23.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public enum TicketState {

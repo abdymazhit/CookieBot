@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.Category;
 /**
  * Представляет собой канал продукта мини-игры Hide And Seek
  *
- * @version   24.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class HideAndSeek extends ProductChannel {
@@ -34,9 +34,9 @@ public class HideAndSeek extends ProductChannel {
                 false);
 
         embedBuilder.addField("Создание тикета",
-                "Для создания тикета о баге введите команду **!ticket**",
+                "Для создания тикета о баге введите команду `/ticket`",
                 false);
-        sendWelcomeMessage(embedBuilder.build());
+        sendChannelMessage(embedBuilder.build());
         embedBuilder.clear();
     }
 }

@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой категорию продуктов
  *
- * @version   28.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class ProductsCategory {
@@ -33,23 +33,18 @@ public class ProductsCategory {
         deleteCategory();
         createCategory();
         createProductsChannels();
-        updateProductsTickets();
+        updateProductsAvailableTicketsList();
     }
 
     /**
      * Удаляет категорию продуктов
      */
     private void deleteCategory() {
-        for(Category category : CookieBot.getInstance().jda.getCategories()) {
-            if(category.getName().equals("Продукты")) {
-                for(TextChannel textChannel : category.getTextChannels()) {
-                    textChannel.delete().submit();
-                }
-                category.delete().submit();
-
-                break;
-            }
+        Category category = CookieBot.getInstance().guild.getCategoriesByName("продукты", true).get(0);
+        for(TextChannel textChannel : category.getTextChannels()) {
+            textChannel.delete().queue();
         }
+        category.delete().queue();
     }
 
     /**
@@ -57,9 +52,9 @@ public class ProductsCategory {
      */
     private void createCategory() {
         try {
-            category = CookieBot.getInstance().jda.getGuilds().get(0).createCategory("Продукты")
+            category = CookieBot.getInstance().guild.createCategory("продукты")
                     .addPermissionOverride(Rank.PLAYER.getRole(), EnumSet.of(Permission.VIEW_CHANNEL), null)
-                    .addPermissionOverride(CookieBot.getInstance().jda.getGuilds().get(0).getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
+                    .addPermissionOverride(CookieBot.getInstance().guild.getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
                     .submit().get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -75,11 +70,11 @@ public class ProductsCategory {
     }
 
     /**
-     * Обновляет все тикеты продуктов
+     * Обновляет список доступных тикетов продуктов
      */
-    public void updateProductsTickets() {
+    public void updateProductsAvailableTicketsList() {
         for(ProductChannel productChannel : productChannels) {
-            productChannel.updateTickets();
+            productChannel.updateAvailableTicketsList();
         }
     }
 

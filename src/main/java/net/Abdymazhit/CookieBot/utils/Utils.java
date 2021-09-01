@@ -2,7 +2,6 @@ package net.Abdymazhit.CookieBot.utils;
 
 import net.Abdymazhit.CookieBot.customs.Ticket;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -18,7 +17,7 @@ import java.time.ZoneId;
 /**
  * Представляет собой инструменты для упрощения работы
  *
- * @version   28.08.2021
+ * @version   01.09.2021
  * @author    Islam Abdymazhit
  */
 public class Utils {
@@ -42,7 +41,7 @@ public class Utils {
     public MessageEmbed getTicketMessageEmbed(Ticket ticket, String title) {
         embedBuilder.setTitle(title);
         embedBuilder.setColor(0xFF58B9FF);
-        embedBuilder.addField("Создатель", ticket.getCreatorId(), false);
+        embedBuilder.addField("Создатель", ticket.getCreator(), false);
         embedBuilder.addField("Продукт", ticket.getProductName(), true);
         embedBuilder.addField("Приоритет", ticket.getPriority().getName(), true);
         embedBuilder.addField("Заговолок", ticket.getTitle(), false);
@@ -58,22 +57,6 @@ public class Utils {
         embedBuilder.clear();
 
         return messageEmbed;
-    }
-
-    /**
-     * Получает числа из сообщения
-     * @param message Сообщение
-     * @return Числа
-     */
-    public int getIntByMessage(Message message) {
-        if(message != null) {
-            String title = message.getEmbeds().get(0).getTitle();
-
-            if(title != null) {
-                return Integer.parseInt(title.replaceAll("[\\D]", ""));
-            }
-        }
-        return -1;
     }
 
     /**
