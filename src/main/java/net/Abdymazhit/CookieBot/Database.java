@@ -50,6 +50,7 @@ public class Database {
      */
     private void createTables() {
         createUsersTable();
+        createUsersHistoryTable();
         createTicketsTable();
         createPendingVerificationTicketsTable();
         createUnverifiedTicketsTable();
@@ -66,6 +67,22 @@ public class Database {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (" +
                     "id serial not null constraint users_pk primary key, " +
+                    "member_id varchar(50) not null, " +
+                    "username varchar(50) not null);");
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Создает таблицу истории пользователей
+     */
+    private void createUsersHistoryTable() {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users_history (" +
+                    "id serial not null constraint users_history_pk primary key, " +
                     "member_id varchar(50) not null, " +
                     "username varchar(50) not null, " +
                     "authorized_in timestamp not null);");

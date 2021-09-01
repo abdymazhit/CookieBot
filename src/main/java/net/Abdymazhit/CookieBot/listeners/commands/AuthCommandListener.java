@@ -141,13 +141,19 @@ public class AuthCommandListener extends ListenerAdapter {
                 statement.executeUpdate();
                 statement.close();
             } else {
-                PreparedStatement statement = connection.prepareStatement("INSERT INTO users (member_id, username, authorized_in) VALUES (?, ?, ?);");
+                PreparedStatement statement = connection.prepareStatement("INSERT INTO users (member_id, username) VALUES (?, ?);");
                 statement.setString(1, memberId);
                 statement.setString(2, username);
-                statement.setTimestamp(3, Timestamp.from(Instant.now()));
                 statement.executeUpdate();
                 statement.close();
             }
+
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO users_history (member_id, username, authorized_in) VALUES (?, ?, ?);");
+            statement.setString(1, memberId);
+            statement.setString(2, username);
+            statement.setTimestamp(3, Timestamp.from(Instant.now()));
+            statement.executeUpdate();
+            statement.close();
 
             // Вернуть значение, что пользователь добавлен
             return true;
