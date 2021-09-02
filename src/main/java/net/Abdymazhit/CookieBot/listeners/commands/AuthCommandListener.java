@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Команда авторизации
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class AuthCommandListener extends ListenerAdapter {
@@ -84,6 +84,14 @@ public class AuthCommandListener extends ListenerAdapter {
         String username = ownerObject.get("username").getAsString();
         Rank rank = Rank.valueOf(ownerObject.get("rank").getAsString());
 
+        String[] banInfo = getBanInfo(username);
+        System.out.println(banInfo.length);
+        if(banInfo.length == 2) {
+            event.reply("Вы были заблокированы! Заблокированы до: " + banInfo[0] +
+                    ". Причина блокировки: " + banInfo[1]).setEphemeral(true).queue();
+            return;
+        }
+
         boolean isAdded = addUser(member.getId(), username);
         if(!isAdded) {
             event.reply("Ошибка! Попробуйте авторизоваться позже!").setEphemeral(true).queue();
@@ -103,6 +111,46 @@ public class AuthCommandListener extends ListenerAdapter {
 
         // Отправить сообщение о успешной авторизации
         event.reply("Вы успешно авторизовались! Ваш ник: " + username + ", ранг: " + rank.getName()).setEphemeral(true).queue();
+    }
+
+    /**
+     * Получает информацию о блокировке пользователя
+     * @param username Ник пользователя
+     * @return Информация о блокировке пользователя
+     */
+    private String[] getBanInfo(String username) {
+        String[] result = new String[0];
+
+        try {
+            Connection connection = CookieBot.getInstance().database.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "SELECT end_time, reason FROM bans WHERE username = ?;");
+            preparedStatement.setString(1, username);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            preparedStatement.close();
+
+            if(resultSet.next()) {
+                Timestamp endTime = resultSet.getTimestamp("end_time");
+                String reason = resultSet.getString("reason");
+
+                Timestamp nowTime = Timestamp.from(Instant.now());
+
+                // Снять блокировку, если время конца блокировки прошло
+                if(nowTime.after(endTime)) {
+                    PreparedStatement deleteStatement = connection.prepareStatement(
+                            "DELETE FROM bans WHERE username = ?;");
+                    deleteStatement.setString(1, username);
+                    deleteStatement.executeUpdate();
+                    deleteStatement.close();
+                } else {
+                    result = new String[] { endTime.toString(), reason };
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     /**
@@ -126,7 +174,9 @@ public class AuthCommandListener extends ListenerAdapter {
                 if(member != null) {
                     // Удалить роли старого пользователя
                     for(Role role : member.getRoles()) {
-                        CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
+                        if(!role.equals(Rank.OWNER.getRole())) {
+                            CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
+                        }
                     }
 
                     // Изменить ник старого пользователя

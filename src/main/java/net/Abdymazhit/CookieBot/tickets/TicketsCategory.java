@@ -29,11 +29,11 @@ public class TicketsCategory {
     /** Список каналов тикетов */
     private final List<TicketChannel> ticketChannels;
 
-    /** Текущие id создателей тикетов */
-    private final List<String> currentTicketCreators;
-
     /** Последний id тикета */
     private int lastId;
+
+    /** Хранит канал тикета по id пользователя */
+    private final Map<String, TicketChannel> ticketChannelMap;
 
     /** Хранит канал для просмотра тикета по id тикета */
     private final Map<TicketViewingChannel, Integer> ticketViewingChannelMap;
@@ -45,8 +45,8 @@ public class TicketsCategory {
         deleteCategory();
         createCategory();
         ticketChannels = new ArrayList<>();
-        currentTicketCreators = new ArrayList<>();
         lastId = 0;
+        ticketChannelMap = new HashMap<>();
         ticketViewingChannelMap = new HashMap<>();
     }
 
@@ -84,13 +84,14 @@ public class TicketsCategory {
      * @param member Пользователь
      */
     public void createTicketCreationChannel(SlashCommandEvent event, Ticket ticket, Member member) {
-        if(!currentTicketCreators.contains(member.getId())) {
-            ticketChannels.add(new TicketCreationChannel(lastId, ticket, member));
+        if(!ticketChannelMap.containsKey(member.getId())) {
+            TicketCreationChannel ticketCreationChannel = new TicketCreationChannel(lastId, ticket, member);
+            ticketChannels.add(ticketCreationChannel);
             event.reply("Канал для создания тикета успешно создан! Номер канала тикета: " + lastId + ". Переместитесь в категорию `Тикеты`.")
                     .delay(10, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).queue();
 
             lastId++;
-            currentTicketCreators.add(member.getId());
+            ticketChannelMap.put(member.getId(), ticketCreationChannel);
         } else {
             event.reply("У вас уже имеется открытый канал тикета! Переместитесь в категорию `Тикеты`.")
                     .delay(10, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).queue();
@@ -106,13 +107,14 @@ public class TicketsCategory {
     public void createTicketVerificationChannel(SlashCommandEvent event, Ticket ticket, Member member) {
         List<Integer> ticketsInVerification = CookieBot.getInstance().separateChannels.getVerificationChannel().getTicketsInVerification();
         if(!ticketsInVerification.contains(ticket.getId())) {
-            if(!currentTicketCreators.contains(member.getId())) {
-                ticketChannels.add(new TicketVerificationChannel(lastId, ticket, member));
+            if(!ticketChannelMap.containsKey(member.getId())) {
+                TicketVerificationChannel ticketVerificationChannel = new TicketVerificationChannel(lastId, ticket, member);
+                ticketChannels.add(ticketVerificationChannel);
                 event.reply("Канал для верификации тикета успешно создан! Номер канала тикета: " + lastId + ". Переместитесь в категорию `Тикеты`.")
                         .delay(10, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).queue();
 
                 lastId++;
-                currentTicketCreators.add(member.getId());
+                ticketChannelMap.put(member.getId(), ticketVerificationChannel);
                 ticketsInVerification.add(ticket.getId());
                 CookieBot.getInstance().separateChannels.getVerificationChannel().updatePendingVerificationTicketsList();
             } else {
@@ -132,7 +134,7 @@ public class TicketsCategory {
      * @param member Пользователь
      */
     public void createTicketViewingChannel(SlashCommandEvent event, Ticket ticket, Member member) {
-        if(!currentTicketCreators.contains(member.getId())) {
+        if(!ticketChannelMap.containsKey(member.getId())) {
             TicketViewingChannel ticketViewingChannel = new TicketViewingChannel(lastId, ticket, member);
 
             ticketChannels.add(ticketViewingChannel);
@@ -140,7 +142,7 @@ public class TicketsCategory {
                     .delay(10, TimeUnit.SECONDS).flatMap(InteractionHook::deleteOriginal).queue();
 
             lastId++;
-            currentTicketCreators.add(member.getId());
+            ticketChannelMap.put(member.getId(), ticketViewingChannel);
             ticketViewingChannelMap.put(ticketViewingChannel, ticket.getId());
         } else {
             event.reply("У вас уже имеется открытый канал тикета! Переместитесь в категорию `Тикеты`.")
@@ -155,7 +157,7 @@ public class TicketsCategory {
      */
     public void removeTicketChannel(TicketChannel ticketChannel, Member member) {
         ticketChannels.remove(ticketChannel);
-        currentTicketCreators.remove(member.getId());
+        ticketChannelMap.remove(member.getId());
 
         if(ticketChannel instanceof TicketVerificationChannel) {
             VerificationChannel verificationChannel = CookieBot.getInstance().separateChannels.getVerificationChannel();
@@ -180,6 +182,15 @@ public class TicketsCategory {
                 }
             }
         }
+    }
+
+    /**
+     * Получает канал тикета
+     * @param memberId Id пользователя
+     * @return Канал тикета
+     */
+    public TicketChannel getTicketChannel(String memberId) {
+        return ticketChannelMap.get(memberId);
     }
 
     /**

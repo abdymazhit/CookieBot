@@ -111,8 +111,9 @@ public class ProductChannel extends Channel {
 
         try {
             Connection connection = CookieBot.getInstance().database.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT T1.id, T1.priority, T1.title, T1.created_on " +
-                    "FROM tickets T1 JOIN available_tickets T2 ON T1.id = T2.ticket_id;");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT T1.id, T1.product, T1.priority, T1.title, T1.created_on " +
+                    "FROM tickets T1 JOIN available_tickets T2 ON T1.id = T2.ticket_id AND T1.product = ?;");
+            preparedStatement.setString(1, channel.getName());
             ResultSet resultSet = preparedStatement.executeQuery();
             preparedStatement.close();
 

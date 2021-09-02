@@ -9,7 +9,7 @@ import java.sql.*;
 /**
  * Отвечает за работу с базой данных
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class Database {
@@ -51,6 +51,8 @@ public class Database {
     private void createTables() {
         createUsersTable();
         createUsersHistoryTable();
+        createBansTable();
+        createBansHistoryTable();
         createTicketsTable();
         createPendingVerificationTicketsTable();
         createUnverifiedTicketsTable();
@@ -86,6 +88,42 @@ public class Database {
                     "member_id varchar(50) not null, " +
                     "username varchar(50) not null, " +
                     "authorized_in timestamp not null);");
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Создает таблицу блокировок пользователей
+     */
+    private void createBansTable() {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS bans (" +
+                    "id serial not null constraint bans_pk primary key, " +
+                    "username varchar(50) not null, " +
+                    "end_time timestamp not null, " +
+                    "reason varchar(50) not null);");
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Создает таблицу истории блокировок пользователей
+     */
+    private void createBansHistoryTable() {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS bans_history (" +
+                    "id serial not null constraint bans_history_pk primary key, " +
+                    "username varchar(50) not null, " +
+                    "time timestamp not null, " +
+                    "ban_time int not null, " +
+                    "reason varchar(50) not null, " +
+                    "admin varchar(50) not null);");
             preparedStatement.executeUpdate();
             preparedStatement.close();
         } catch (SQLException e) {

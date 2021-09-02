@@ -1,6 +1,7 @@
 package net.Abdymazhit.CookieBot.listeners;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.Abdymazhit.CookieBot.CookieBot;
@@ -40,7 +41,10 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
                 + "?token=" + CookieBot.getInstance().config.vimeApiToken);
         if(userInfo == null) return;
 
-        JsonArray infoArray = JsonParser.parseString(userInfo).getAsJsonArray();
+        JsonElement infoElement = JsonParser.parseString(userInfo);
+        if(infoElement.isJsonNull()) return;
+
+        JsonArray infoArray = infoElement.getAsJsonArray();
         if(infoArray.isEmpty()) return;
 
         JsonObject infoObject = infoArray.get(0).getAsJsonObject();
@@ -49,7 +53,9 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
         Rank rank = Rank.valueOf(infoObject.get("rank").getAsString());
         if(!member.getRoles().contains(rank.getRole())) {
             for(Role role : member.getRoles()) {
-                CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
+                if(!role.equals(Rank.OWNER.getRole())) {
+                    CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
+                }
             }
 
             if(!rank.equals(Rank.PLAYER)) {
@@ -60,7 +66,7 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
         } else {
             if(rank.equals(Rank.PLAYER)) {
                 for(Role role : member.getRoles()) {
-                    if(!role.equals(Rank.PLAYER.getRole())) {
+                    if(!role.equals(Rank.PLAYER.getRole()) && !role.equals(Rank.OWNER.getRole())) {
                         CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
                     }
                 }

@@ -14,7 +14,7 @@ import java.time.Instant;
 /**
  * Представляет собой канал просмотра тикета
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class TicketViewingChannel extends TicketChannel {
@@ -142,22 +142,30 @@ public class TicketViewingChannel extends TicketChannel {
      * @return Значение, удален ли тикет
      */
     private boolean deleteTicket() {
-        String sqlDelete = "DELETE FROM available_tickets WHERE ticket_id = " + ticket.getId() + ";";
         try {
             Connection connection = CookieBot.getInstance().database.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlDelete +
-                    " INSERT INTO deleted_tickets (ticket_id, deleter, deleted_at) " +
+
+            // Удалить тикет из таблицы доступных тикетов
+            PreparedStatement deleteStatement = connection.prepareStatement(
+                    "DELETE FROM available_tickets WHERE ticket_id = ?;");
+            deleteStatement.setInt(1, ticket.getId());
+            deleteStatement.executeUpdate();
+            deleteStatement.close();
+
+            // Добавить тикет в таблицу удаленных тикетов
+            PreparedStatement insertStatement = connection.prepareStatement(
+                    "INSERT INTO deleted_tickets (ticket_id, deleter, deleted_at) " +
                     "SELECT ?, ?, ? WHERE NOT EXISTS (SELECT ticket_id FROM deleted_tickets WHERE ticket_id = ?);");
-            preparedStatement.setInt(1, ticket.getId());
+            insertStatement.setInt(1, ticket.getId());
             if(member.getNickname() != null) {
-                preparedStatement.setString(2, member.getNickname());
+                insertStatement.setString(2, member.getNickname());
             } else {
-                preparedStatement.setString(2, member.getEffectiveName());
+                insertStatement.setString(2, member.getEffectiveName());
             }
-            preparedStatement.setTimestamp(3, Timestamp.from(Instant.now()));
-            preparedStatement.setInt(4, ticket.getId());
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
+            insertStatement.setTimestamp(3, Timestamp.from(Instant.now()));
+            insertStatement.setInt(4, ticket.getId());
+            insertStatement.executeUpdate();
+            insertStatement.close();
 
             // Вернуть значение, что тикет удален
             return true;
@@ -174,20 +182,30 @@ public class TicketViewingChannel extends TicketChannel {
      * @return Значение, исправлен ли тикет
      */
     private boolean fixTicket() {
-        String sqlDelete = "DELETE FROM available_tickets WHERE ticket_id = " + ticket.getId() + ";";
         try {
             Connection connection = CookieBot.getInstance().database.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlDelete +
-                    " INSERT INTO fixed_tickets (ticket_id, fixer, fixed_on) " +
+
+            // Удалить тикет из таблицы доступных тикетов
+            PreparedStatement deleteStatement = connection.prepareStatement(
+                    "DELETE FROM available_tickets WHERE ticket_id = ?;");
+            deleteStatement.setInt(1, ticket.getId());
+            deleteStatement.executeUpdate();
+            deleteStatement.close();
+
+            // Добавить тикет в таблицу исправленных тикетов
+            PreparedStatement insertStatement = connection.prepareStatement(
+                    "INSERT INTO fixed_tickets (ticket_id, fixer, fixed_on) " +
                     "SELECT ?, ?, ? WHERE NOT EXISTS (SELECT ticket_id FROM fixed_tickets WHERE ticket_id = ?);");
-            preparedStatement.setInt(1, ticket.getId());
+            insertStatement.setInt(1, ticket.getId());
             if(member.getNickname() != null) {
-                preparedStatement.setString(2, member.getNickname());
+                insertStatement.setString(2, member.getNickname());
             } else {
-                preparedStatement.setString(2, member.getEffectiveName());
+                insertStatement.setString(2, member.getEffectiveName());
             }
-            preparedStatement.setTimestamp(3, Timestamp.from(Instant.now()));
-            preparedStatement.setInt(4, ticket.getId());
+            insertStatement.setTimestamp(3, Timestamp.from(Instant.now()));
+            insertStatement.setInt(4, ticket.getId());
+            insertStatement.executeUpdate();
+            insertStatement.close();
 
             // Вернуть значение, что тикет исправлен
             return true;

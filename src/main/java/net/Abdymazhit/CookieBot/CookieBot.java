@@ -29,7 +29,7 @@ import java.nio.file.Files;
 /**
  * Главный класс, отвечает за инициализацию бота
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class CookieBot {
@@ -133,6 +133,11 @@ public class CookieBot {
         commandsAction = commandsAction.addCommands(new CommandData("auth", "Авторизация")
                 .addOption(OptionType.STRING, "token", "Токен авторизации", true));
 
+        commandsAction = commandsAction.addCommands(new CommandData("ban", "Блокировка пользователя")
+                .addOption(OptionType.STRING, "username", "Ник пользователя", true)
+                .addOption(OptionType.INTEGER, "time", "Время в минутах", true)
+                .addOption(OptionType.STRING, "reason", "Причина блокировки", true));
+
         commandsAction = commandsAction.addCommands(new CommandData("ticket", "Создать новый тикет"));
 
         commandsAction = commandsAction.addCommands(new CommandData("verify", "Верифицировать тикет")
@@ -152,6 +157,7 @@ public class CookieBot {
      */
     private void addEventListeners(JDA jda) {
         jda.addEventListener(new AuthCommandListener());
+        jda.addEventListener(new BanCommandListener());
         jda.addEventListener(new TicketCommandListener());
         jda.addEventListener(new UpdateCommandListener());
         jda.addEventListener(new VerifyCommandListener());
