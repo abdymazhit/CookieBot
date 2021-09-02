@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой категорию продуктов
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class ProductsCategory {
@@ -40,11 +40,14 @@ public class ProductsCategory {
      * Удаляет категорию продуктов
      */
     private void deleteCategory() {
-        Category category = CookieBot.getInstance().guild.getCategoriesByName("продукты", true).get(0);
-        for(TextChannel textChannel : category.getTextChannels()) {
-            textChannel.delete().queue();
+        List<Category> categories = CookieBot.getInstance().guild.getCategoriesByName("продукты", true);
+        if(!categories.isEmpty()) {
+            Category category = categories.get(0);
+            for(TextChannel textChannel : category.getTextChannels()) {
+                textChannel.delete().queue();
+            }
+            category.delete().queue();
         }
-        category.delete().queue();
     }
 
     /**

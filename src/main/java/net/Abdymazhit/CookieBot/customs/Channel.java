@@ -4,12 +4,14 @@ import net.Abdymazhit.CookieBot.CookieBot;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
  * Представляет собой канал
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class Channel {
@@ -19,11 +21,10 @@ public class Channel {
 
     /**
      * Удаляет канал
-     * @param categoryName Название категории
+     * @param category Категория
      * @param channelName Название канала
      */
-    public void deleteChannel(String categoryName, String channelName) {
-        Category category = CookieBot.getInstance().guild.getCategoriesByName(categoryName, true).get(0);
+    public void deleteChannel(Category category, String channelName) {
         for(TextChannel textChannel : category.getTextChannels()) {
             if(textChannel.getName().equals(channelName)) {
                 textChannel.delete().queue();
@@ -37,18 +38,21 @@ public class Channel {
      * @param channelName Название канала
      */
     public void deleteChannel(String channelName) {
-        CookieBot.getInstance().guild.getTextChannelsByName(channelName, true).get(0).delete().queue();
+        List<TextChannel> textChannels = CookieBot.getInstance().guild.getTextChannelsByName(channelName, true);
+        if(!textChannels.isEmpty()) {
+            textChannels.get(0).delete().queue();
+        }
     }
 
     /**
      * Создает канал
-     * @param categoryName Название категории
+     * @param category Категория
      * @param channelName Название канала
+     * @param position Позиция канала
      */
-    public void createChannel(String categoryName, String channelName) {
-        Category category = CookieBot.getInstance().guild.getCategoriesByName(categoryName, true).get(0);
+    public void createChannel(Category category, String channelName, @Nullable Integer position) {
         try {
-            channel = category.createTextChannel(channelName).submit().get();
+            channel = category.createTextChannel(channelName).setPosition(position).submit().get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -57,10 +61,11 @@ public class Channel {
     /**
      * Создает канал
      * @param channelName Название канала
+     * @param position Позиция канала
      */
-    public void createChannel(String channelName) {
+    public void createChannel(String channelName, @Nullable Integer position) {
         try {
-            channel = CookieBot.getInstance().guild.createTextChannel(channelName).submit().get();
+            channel = CookieBot.getInstance().guild.createTextChannel(channelName).setPosition(position).submit().get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }

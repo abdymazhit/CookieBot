@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Представляет собой категорию тикетов
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class TicketsCategory {
@@ -54,11 +54,14 @@ public class TicketsCategory {
      * Удаляет категорию тикетов
      */
     private void deleteCategory() {
-        Category category = CookieBot.getInstance().guild.getCategoriesByName("тикеты", true).get(0);
-        for(TextChannel textChannel : category.getTextChannels()) {
-            textChannel.delete().queue();
+        List<Category> categories = CookieBot.getInstance().guild.getCategoriesByName("тикеты", true);
+        if(!categories.isEmpty()) {
+            Category category = categories.get(0);
+            for(TextChannel textChannel : category.getTextChannels()) {
+                textChannel.delete().queue();
+            }
+            category.delete().queue();
         }
-        category.delete().queue();
     }
 
     /**

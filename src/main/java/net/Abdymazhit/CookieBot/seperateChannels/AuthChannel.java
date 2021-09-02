@@ -5,7 +5,7 @@ import net.Abdymazhit.CookieBot.customs.Channel;
 /**
  * Отвечает за создание канала авторизации
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class AuthChannel extends Channel {
@@ -15,7 +15,7 @@ public class AuthChannel extends Channel {
      */
     public AuthChannel() {
         deleteChannel("авторизация");
-        createChannel("авторизация");
+        createChannel("авторизация", 0);
         sendChannelMessage();
     }
 

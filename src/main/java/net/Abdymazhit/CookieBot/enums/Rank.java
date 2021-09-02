@@ -3,10 +3,12 @@ package net.Abdymazhit.CookieBot.enums;
 import net.Abdymazhit.CookieBot.CookieBot;
 import net.dv8tion.jda.api.entities.Role;
 
+import java.util.List;
+
 /**
  * Представляет собой ранг пользователя
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public enum Rank {
@@ -28,7 +30,7 @@ public enum Rank {
     OWNER("Владелец");
 
     private final String name;
-    private final Role role;
+    private Role role;
 
     /**
      * Инициализирует ранг
@@ -36,7 +38,10 @@ public enum Rank {
      */
     Rank(String name) {
         this.name = name;
-        this.role = CookieBot.getInstance().guild.getRolesByName(name, true).get(0);
+        List<Role> roles = CookieBot.getInstance().guild.getRolesByName(name, true);
+        if(!roles.isEmpty()) {
+            this.role = roles.get(0);
+        }
     }
 
     /**

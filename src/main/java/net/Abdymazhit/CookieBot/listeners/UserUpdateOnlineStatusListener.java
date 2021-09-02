@@ -1,5 +1,6 @@
 package net.Abdymazhit.CookieBot.listeners;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.Abdymazhit.CookieBot.CookieBot;
@@ -13,7 +14,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 /**
  * Обработчик событий изменения статуса онлайна пользователя
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class UserUpdateOnlineStatusListener extends ListenerAdapter {
@@ -39,7 +40,10 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
                 + "?token=" + CookieBot.getInstance().config.vimeApiToken);
         if(userInfo == null) return;
 
-        JsonObject infoObject = JsonParser.parseString(userInfo).getAsJsonArray().get(0).getAsJsonObject();
+        JsonArray infoArray = JsonParser.parseString(userInfo).getAsJsonArray();
+        if(infoArray.isEmpty()) return;
+
+        JsonObject infoObject = infoArray.get(0).getAsJsonObject();
 
         // Обновить ранг пользователя
         Rank rank = Rank.valueOf(infoObject.get("rank").getAsString());

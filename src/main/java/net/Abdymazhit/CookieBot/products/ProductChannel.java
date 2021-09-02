@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Представляет собой канал продукта
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class ProductChannel extends Channel {
@@ -32,7 +32,7 @@ public class ProductChannel extends Channel {
      * @param channelName Название канала продукта
      */
     public ProductChannel(Category category, String channelName) {
-        createChannel(category.getName(), channelName);
+        createChannel(category, channelName, null);
     }
 
     /**

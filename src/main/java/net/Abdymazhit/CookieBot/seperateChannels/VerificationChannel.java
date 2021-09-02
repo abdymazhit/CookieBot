@@ -4,6 +4,7 @@ import net.Abdymazhit.CookieBot.CookieBot;
 import net.Abdymazhit.CookieBot.customs.Channel;
 import net.Abdymazhit.CookieBot.customs.Ticket;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Message;
 
 import java.sql.*;
@@ -15,13 +16,13 @@ import java.util.concurrent.ExecutionException;
 /**
  * Отвечает за создание канала верификации тикетов
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class VerificationChannel extends Channel {
 
     /** Список верифицируемых тикетов */
-    private final List<Integer> ticketsInVerification;
+    private List<Integer> ticketsInVerification;
 
     /** Сообщение ожидающих верификации тикетов */
     private Message pendingVerificationTicketsMessage;
@@ -30,10 +31,14 @@ public class VerificationChannel extends Channel {
      * Инициализирует канал верификации
      */
     public VerificationChannel() {
-        deleteChannel("модерация", "верификация");
-        createChannel("модерация", "верификация");
-        ticketsInVerification = new ArrayList<>();
-        updatePendingVerificationTicketsList();
+        List<Category> categories = CookieBot.getInstance().guild.getCategoriesByName("модерация", true);
+        if(!categories.isEmpty()) {
+            Category category = categories.get(0);
+            deleteChannel(category, "верификация");
+            createChannel(category, "верификация", null);
+            ticketsInVerification = new ArrayList<>();
+            updatePendingVerificationTicketsList();
+        }
     }
 
     /**
