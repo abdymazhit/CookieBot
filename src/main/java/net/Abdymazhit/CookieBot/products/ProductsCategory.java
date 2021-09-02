@@ -4,6 +4,7 @@ import net.Abdymazhit.CookieBot.CookieBot;
 import net.Abdymazhit.CookieBot.enums.Rank;
 import net.Abdymazhit.CookieBot.products.channels.HideAndSeek;
 import net.Abdymazhit.CookieBot.products.channels.LuckyWars;
+import net.Abdymazhit.CookieBot.products.channels.MurderMystery;
 import net.Abdymazhit.CookieBot.products.channels.SpeedBuilders;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
@@ -71,6 +72,7 @@ public class ProductsCategory {
      */
     private void createProductsChannels() {
         productChannels = new ArrayList<>();
+        productChannels.add(new MurderMystery(category));
         productChannels.add(new LuckyWars(category));
         productChannels.add(new HideAndSeek(category));
         productChannels.add(new SpeedBuilders(category));

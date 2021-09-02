@@ -43,6 +43,7 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
 
         JsonElement infoElement = JsonParser.parseString(userInfo);
         if(infoElement.isJsonNull()) return;
+        if(!(infoElement instanceof JsonArray)) return;
 
         JsonArray infoArray = infoElement.getAsJsonArray();
         if(infoArray.isEmpty()) return;
