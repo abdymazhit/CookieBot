@@ -174,7 +174,7 @@ public class AuthCommandListener extends ListenerAdapter {
                 if(member != null) {
                     // Удалить роли старого пользователя
                     for(Role role : member.getRoles()) {
-                        if(!role.equals(Rank.OWNER.getRole())) {
+                        if(!role.equals(Rank.OWNER.getRole()) && !role.equals(Rank.MODER_DISCORD.getRole())) {
                             CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
                         }
                     }

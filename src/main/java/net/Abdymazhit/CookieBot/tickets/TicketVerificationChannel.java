@@ -17,7 +17,7 @@ import java.time.Instant;
 /**
  * Представляет собой канал верификации тикета
  *
- * @version   01.09.2021
+ * @version   02.09.2021
  * @author    Islam Abdymazhit
  */
 public class TicketVerificationChannel extends TicketChannel {
@@ -88,7 +88,8 @@ public class TicketVerificationChannel extends TicketChannel {
                         !member.getRoles().contains(Rank.WARDEN.getRole()) &&
                         !member.getRoles().contains(Rank.CHIEF.getRole()) &&
                         !member.getRoles().contains(Rank.ADMIN.getRole()) &&
-                        !member.getRoles().contains(Rank.OWNER.getRole())) {
+                        !member.getRoles().contains(Rank.OWNER.getRole()) &&
+                        !member.getRoles().contains(Rank.MODER_DISCORD.getRole())) {
                     channel.sendMessage("У вас нет прав для этого действия!").queue();
                     return;
                 }
@@ -114,7 +115,8 @@ public class TicketVerificationChannel extends TicketChannel {
                         !member.getRoles().contains(Rank.WARDEN.getRole()) &&
                         !member.getRoles().contains(Rank.CHIEF.getRole()) &&
                         !member.getRoles().contains(Rank.ADMIN.getRole()) &&
-                        !member.getRoles().contains(Rank.OWNER.getRole())) {
+                        !member.getRoles().contains(Rank.OWNER.getRole()) &&
+                        !member.getRoles().contains(Rank.MODER_DISCORD.getRole())) {
                     channel.sendMessage("У вас нет прав для этого действия!").queue();
                     return;
                 }

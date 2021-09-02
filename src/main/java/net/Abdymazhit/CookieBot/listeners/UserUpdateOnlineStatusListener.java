@@ -54,7 +54,7 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
         Rank rank = Rank.valueOf(infoObject.get("rank").getAsString());
         if(!member.getRoles().contains(rank.getRole())) {
             for(Role role : member.getRoles()) {
-                if(!role.equals(Rank.OWNER.getRole())) {
+                if(!role.equals(Rank.OWNER.getRole()) && !role.equals(Rank.MODER_DISCORD.getRole())) {
                     CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
                 }
             }
@@ -67,7 +67,7 @@ public class UserUpdateOnlineStatusListener extends ListenerAdapter {
         } else {
             if(rank.equals(Rank.PLAYER)) {
                 for(Role role : member.getRoles()) {
-                    if(!role.equals(Rank.PLAYER.getRole()) && !role.equals(Rank.OWNER.getRole())) {
+                    if(!role.equals(Rank.PLAYER.getRole()) && !role.equals(Rank.OWNER.getRole()) && !role.equals(Rank.MODER_DISCORD.getRole())) {
                         CookieBot.getInstance().guild.removeRoleFromMember(member, role).queue();
                     }
                 }

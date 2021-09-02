@@ -46,11 +46,8 @@ public class TicketViewingChannel extends TicketChannel {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Просмотр тикета");
         embedBuilder.setColor(0xFF58B9FF);
-        if(member.getRoles().contains(Rank.MODER.getRole()) ||
-                member.getRoles().contains(Rank.WARDEN.getRole()) ||
-                member.getRoles().contains(Rank.CHIEF.getRole()) ||
-                member.getRoles().contains(Rank.ADMIN.getRole()) ||
-                member.getRoles().contains(Rank.OWNER.getRole())) {
+        if(member.getRoles().contains(Rank.OWNER.getRole()) ||
+                member.getRoles().contains(Rank.MODER_DISCORD.getRole())) {
             embedBuilder.addField("Удаление",
                     "Удаляйте только если тикет не правильный или не подлежит исправлению (фича). " +
                             "Восстановление удаленных тикетов не возможно! Введите команду `!delete` для удаления",
@@ -80,11 +77,8 @@ public class TicketViewingChannel extends TicketChannel {
 
         switch (message) {
             case "!delete":
-                if(!member.getRoles().contains(Rank.MODER.getRole()) &&
-                        !member.getRoles().contains(Rank.WARDEN.getRole()) &&
-                        !member.getRoles().contains(Rank.CHIEF.getRole()) &&
-                        !member.getRoles().contains(Rank.ADMIN.getRole()) &&
-                        !member.getRoles().contains(Rank.OWNER.getRole())) {
+                if(!member.getRoles().contains(Rank.OWNER.getRole()) &&
+                        !member.getRoles().contains(Rank.MODER_DISCORD.getRole())) {
                     channel.sendMessage("У вас нет прав для этого действия!").queue();
                     return;
                 }
@@ -104,11 +98,8 @@ public class TicketViewingChannel extends TicketChannel {
                 deleteChannel();
                 return;
             case "!fix":
-                if(!member.getRoles().contains(Rank.MODER.getRole()) &&
-                        !member.getRoles().contains(Rank.WARDEN.getRole()) &&
-                        !member.getRoles().contains(Rank.CHIEF.getRole()) &&
-                        !member.getRoles().contains(Rank.ADMIN.getRole()) &&
-                        !member.getRoles().contains(Rank.OWNER.getRole())) {
+                if(!member.getRoles().contains(Rank.OWNER.getRole()) &&
+                        !member.getRoles().contains(Rank.MODER_DISCORD.getRole())) {
                     channel.sendMessage("У вас нет прав для этого действия!").queue();
                     return;
                 }

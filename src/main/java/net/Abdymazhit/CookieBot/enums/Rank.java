@@ -27,6 +27,7 @@ public enum Rank {
     WARDEN("Пр. Модер"),
     CHIEF("Гл. Модер"),
     ADMIN("Гл. Админ"),
+    MODER_DISCORD("Модер Discord"),
     OWNER("Владелец");
 
     private final String name;

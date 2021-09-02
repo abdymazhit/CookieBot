@@ -32,7 +32,7 @@ public class BanCommandListener extends ListenerAdapter {
         if (!event.getName().equals("ban")) return;
         if (member == null) return;
 
-        if(member.getRoles().contains(Rank.OWNER.getRole())) {
+        if(!member.getRoles().contains(Rank.OWNER.getRole()) && !member.getRoles().contains(Rank.MODER_DISCORD.getRole())) {
             event.reply("У вас нет прав для этого действия!").setEphemeral(true).queue();
             return;
         }
@@ -78,7 +78,7 @@ public class BanCommandListener extends ListenerAdapter {
 
         // Удалить роли пользователя
         for(Role role : user.getRoles()) {
-            if(!role.equals(Rank.OWNER.getRole())) {
+            if(!role.equals(Rank.OWNER.getRole()) && !role.equals(Rank.MODER_DISCORD.getRole())) {
                 CookieBot.getInstance().guild.removeRoleFromMember(user, role).queue();
             }
         }
