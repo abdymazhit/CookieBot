@@ -8,10 +8,12 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Обработчик событий получения сообщений
  *
- * @version   01.09.2021
+ * @version   03.09.2021
  * @author    Islam Abdymazhit
  */
 public class MessageReceivedListener extends ListenerAdapter {
@@ -32,8 +34,10 @@ public class MessageReceivedListener extends ListenerAdapter {
         } else if(messageChannel.equals(CookieBot.getInstance().separateChannels.getVerificationChannel().channel)) {
             if(!event.getAuthor().isBot()) {
                 message.delete().queue();
-                return;
+            } else {
+                message.delete().queueAfter(3, TimeUnit.SECONDS);
             }
+            return;
         }
 
         // Проверка, является ли канал каналом продукта

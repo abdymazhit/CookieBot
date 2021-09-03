@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Отвечает за создание канала верификации тикетов
  *
- * @version   02.09.2021
+ * @version   03.09.2021
  * @author    Islam Abdymazhit
  */
 public class VerificationChannel extends Channel {
@@ -35,7 +35,7 @@ public class VerificationChannel extends Channel {
         if(!categories.isEmpty()) {
             Category category = categories.get(0);
             deleteChannel(category, "верификация");
-            createChannel(category, "верификация", null);
+            createChannel(category, "верификация", 0);
             ticketsInVerification = new ArrayList<>();
             updatePendingVerificationTicketsList();
         }

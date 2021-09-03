@@ -2,6 +2,7 @@ package net.Abdymazhit.CookieBot.listeners.commands;
 
 import net.Abdymazhit.CookieBot.CookieBot;
 import net.Abdymazhit.CookieBot.customs.Ticket;
+import net.Abdymazhit.CookieBot.enums.Rank;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -11,7 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 /**
  * Команда верификации тикета
  *
- * @version   01.09.2021
+ * @version   03.09.2021
  * @author    Islam Abdymazhit
  */
 public class VerifyCommandListener extends ListenerAdapter {
@@ -31,6 +32,16 @@ public class VerifyCommandListener extends ListenerAdapter {
         OptionMapping idOption = event.getOption("id");
         if(idOption == null) {
             event.reply("Ошибка! Неверный id ожидающего верификации тикета!").queue();
+            return;
+        }
+
+        if(!member.getRoles().contains(Rank.MODER.getRole()) &&
+                !member.getRoles().contains(Rank.WARDEN.getRole()) &&
+                !member.getRoles().contains(Rank.CHIEF.getRole()) &&
+                !member.getRoles().contains(Rank.ADMIN.getRole()) &&
+                !member.getRoles().contains(Rank.OWNER.getRole()) &&
+                !member.getRoles().contains(Rank.MODER_DISCORD.getRole())) {
+            event.reply("У вас нет прав для этого действия!").queue();
             return;
         }
 
